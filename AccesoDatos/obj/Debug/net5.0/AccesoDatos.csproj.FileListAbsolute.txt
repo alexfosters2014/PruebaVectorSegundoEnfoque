@@ -1,0 +1,15 @@
+C:\Users\Alex\Source\Repos\alexfosters2014\PruebaVectorSegundoEnfoque\AccesoDatos\bin\Debug\net5.0\AccesoDatos.deps.json
+C:\Users\Alex\Source\Repos\alexfosters2014\PruebaVectorSegundoEnfoque\AccesoDatos\bin\Debug\net5.0\AccesoDatos.runtimeconfig.json
+C:\Users\Alex\Source\Repos\alexfosters2014\PruebaVectorSegundoEnfoque\AccesoDatos\bin\Debug\net5.0\AccesoDatos.runtimeconfig.dev.json
+C:\Users\Alex\Source\Repos\alexfosters2014\PruebaVectorSegundoEnfoque\AccesoDatos\bin\Debug\net5.0\AccesoDatos.dll
+C:\Users\Alex\Source\Repos\alexfosters2014\PruebaVectorSegundoEnfoque\AccesoDatos\bin\Debug\net5.0\ref\AccesoDatos.dll
+C:\Users\Alex\Source\Repos\alexfosters2014\PruebaVectorSegundoEnfoque\AccesoDatos\bin\Debug\net5.0\AccesoDatos.pdb
+C:\Users\Alex\Source\Repos\alexfosters2014\PruebaVectorSegundoEnfoque\AccesoDatos\obj\Debug\net5.0\AccesoDatos.csproj.AssemblyReference.cache
+C:\Users\Alex\Source\Repos\alexfosters2014\PruebaVectorSegundoEnfoque\AccesoDatos\obj\Debug\net5.0\AccesoDatos.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Alex\Source\Repos\alexfosters2014\PruebaVectorSegundoEnfoque\AccesoDatos\obj\Debug\net5.0\AccesoDatos.AssemblyInfoInputs.cache
+C:\Users\Alex\Source\Repos\alexfosters2014\PruebaVectorSegundoEnfoque\AccesoDatos\obj\Debug\net5.0\AccesoDatos.AssemblyInfo.cs
+C:\Users\Alex\Source\Repos\alexfosters2014\PruebaVectorSegundoEnfoque\AccesoDatos\obj\Debug\net5.0\AccesoDatos.csproj.CoreCompileInputs.cache
+C:\Users\Alex\Source\Repos\alexfosters2014\PruebaVectorSegundoEnfoque\AccesoDatos\obj\Debug\net5.0\AccesoDatos.dll
+C:\Users\Alex\Source\Repos\alexfosters2014\PruebaVectorSegundoEnfoque\AccesoDatos\obj\Debug\net5.0\ref\AccesoDatos.dll
+C:\Users\Alex\Source\Repos\alexfosters2014\PruebaVectorSegundoEnfoque\AccesoDatos\obj\Debug\net5.0\AccesoDatos.pdb
+C:\Users\Alex\Source\Repos\alexfosters2014\PruebaVectorSegundoEnfoque\AccesoDatos\obj\Debug\net5.0\AccesoDatos.genruntimeconfig.cache

@@ -1,0 +1,71 @@
+.page[b-zhbzpxf81l] {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.main[b-zhbzpxf81l] {
+    flex: 1;
+}
+
+.sidebar[b-zhbzpxf81l] { /*alexisfranca*/
+    /* background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);*/
+    background: radial-gradient(circle, rgba(255,143,0,1) 0%, rgba(57,32,0,1) 100%);
+}
+
+.top-row[b-zhbzpxf81l] {
+    background-color: #271600;
+    border-bottom: 1px solid #d6d5d5;
+    justify-content: flex-end;
+    height: 3.5rem;
+    display: flex;
+    align-items: center;
+}
+
+    .top-row[b-zhbzpxf81l]  a, .top-row .btn-link[b-zhbzpxf81l] {
+        white-space: nowrap;
+        margin-left: 1.5rem;
+    }
+
+    .top-row a:first-child[b-zhbzpxf81l] {
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+@media (max-width: 640.98px) {
+    .top-row:not(.auth)[b-zhbzpxf81l] {
+        display: none;
+    }
+
+    .top-row.auth[b-zhbzpxf81l] {
+        justify-content: space-between;
+    }
+
+    .top-row a[b-zhbzpxf81l], .top-row .btn-link[b-zhbzpxf81l] {
+        margin-left: 0;
+    }
+}
+
+@media (min-width: 641px) {
+    .page[b-zhbzpxf81l] {
+        flex-direction: row;
+    }
+
+    .sidebar[b-zhbzpxf81l] {
+        width: 250px;
+        height: 100vh;
+        position: sticky;
+        top: 0;
+    }
+
+    .top-row[b-zhbzpxf81l] {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+    }
+
+    .main > div[b-zhbzpxf81l] {
+        padding-left: 2rem !important;
+        padding-right: 1.5rem !important;
+    }
+}

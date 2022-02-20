@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>VectorWebAPI</name>
+    </assembly>
+    <members>
+        <member name="M:VectorWebAPI.Controllers.ClienteController.AgregarNuevoCliente(Modelo.ClienteDTO)">
+            <summary>
+            Se registra un nuevo cliente al sistema
+            </summary>
+            <param name="clienteDTO"></param>
+            <returns>La entidad mapeada a DTO del cliente ingresado al sistema</returns>
+        </member>
+    </members>
+</doc>

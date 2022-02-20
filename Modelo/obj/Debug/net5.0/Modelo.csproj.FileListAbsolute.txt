@@ -1,0 +1,15 @@
+C:\Users\Alex\Source\Repos\alexfosters2014\PruebaVectorSegundoEnfoque\Modelo\bin\Debug\net5.0\Modelo.deps.json
+C:\Users\Alex\Source\Repos\alexfosters2014\PruebaVectorSegundoEnfoque\Modelo\bin\Debug\net5.0\Modelo.dll
+C:\Users\Alex\Source\Repos\alexfosters2014\PruebaVectorSegundoEnfoque\Modelo\bin\Debug\net5.0\ref\Modelo.dll
+C:\Users\Alex\Source\Repos\alexfosters2014\PruebaVectorSegundoEnfoque\Modelo\bin\Debug\net5.0\Modelo.pdb
+C:\Users\Alex\Source\Repos\alexfosters2014\PruebaVectorSegundoEnfoque\Modelo\bin\Debug\net5.0\Comun.dll
+C:\Users\Alex\Source\Repos\alexfosters2014\PruebaVectorSegundoEnfoque\Modelo\bin\Debug\net5.0\Comun.pdb
+C:\Users\Alex\Source\Repos\alexfosters2014\PruebaVectorSegundoEnfoque\Modelo\obj\Debug\net5.0\Modelo.csproj.AssemblyReference.cache
+C:\Users\Alex\Source\Repos\alexfosters2014\PruebaVectorSegundoEnfoque\Modelo\obj\Debug\net5.0\Modelo.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Alex\Source\Repos\alexfosters2014\PruebaVectorSegundoEnfoque\Modelo\obj\Debug\net5.0\Modelo.AssemblyInfoInputs.cache
+C:\Users\Alex\Source\Repos\alexfosters2014\PruebaVectorSegundoEnfoque\Modelo\obj\Debug\net5.0\Modelo.AssemblyInfo.cs
+C:\Users\Alex\Source\Repos\alexfosters2014\PruebaVectorSegundoEnfoque\Modelo\obj\Debug\net5.0\Modelo.csproj.CoreCompileInputs.cache
+C:\Users\Alex\Source\Repos\alexfosters2014\PruebaVectorSegundoEnfoque\Modelo\obj\Debug\net5.0\Modelo.csproj.CopyComplete
+C:\Users\Alex\Source\Repos\alexfosters2014\PruebaVectorSegundoEnfoque\Modelo\obj\Debug\net5.0\Modelo.dll
+C:\Users\Alex\Source\Repos\alexfosters2014\PruebaVectorSegundoEnfoque\Modelo\obj\Debug\net5.0\ref\Modelo.dll
+C:\Users\Alex\Source\Repos\alexfosters2014\PruebaVectorSegundoEnfoque\Modelo\obj\Debug\net5.0\Modelo.pdb

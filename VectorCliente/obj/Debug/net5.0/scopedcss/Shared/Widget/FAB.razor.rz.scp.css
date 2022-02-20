@@ -1,0 +1,91 @@
+*[b-gbsuc9dzqd] {
+    margin: 0;
+    padding: 0;
+}
+
+.fab-container[b-gbsuc9dzqd] {
+    padding:0;
+    margin:0;
+    cursor: pointer;
+    position: relative;
+    width: 30px;
+    height: 30px;
+}
+
+.fab-icon-holder[b-gbsuc9dzqd] {
+    width: 30px;
+    height: 30px;
+    border-radius: 100%;
+    background: #132e8f;
+}
+
+    .fab-icon-holder:hover[b-gbsuc9dzqd] {
+        opacity: 0.6;
+    }
+
+    .fab-icon-holder i[b-gbsuc9dzqd] {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        font-size: 13px;
+        color: #ffffff;
+    }
+
+.fab[b-gbsuc9dzqd] {
+    width: 30px;
+    height: 30px;
+    /*background: #7363cc;*/
+    background: #5a227c;
+}
+
+.fab-options[b-gbsuc9dzqd] {
+    list-style-type: none;
+    margin: 0;
+    padding-left: 20px;
+    position: absolute;
+    top: -50px;
+    left: -248px;
+    opacity: 0;
+    transition: all 0.1s ease;
+    transform: scale(0);
+    transform-origin: 85% bottom;
+    z-index:999;
+}
+
+/*.fab-options {
+    list-style-type: none;
+    margin: 0;
+    padding-top: 10px;
+    position: absolute;
+    top: 15px;
+    left: -195px;
+    opacity: 0;
+    transition: all 0.1s ease;
+    transform: scale(0);
+    transform-origin: 85% bottom;
+    z-index: 999;
+}*/
+
+    .fab:hover + .fab-options[b-gbsuc9dzqd], .fab-options:hover[b-gbsuc9dzqd] {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    .fab-options li[b-gbsuc9dzqd] {
+        display: flex;
+        justify-content: flex-end;
+        padding: 1px;
+    }
+
+.fab-label[b-gbsuc9dzqd] {
+    padding: 3px 7px;
+    align-self: center;
+    user-select: none;
+    white-space: nowrap;
+    border-radius: 10px;
+    font-size: 13px;
+    background-color: grey;
+    color: #ffffff;
+    margin-right: 10px;
+}
