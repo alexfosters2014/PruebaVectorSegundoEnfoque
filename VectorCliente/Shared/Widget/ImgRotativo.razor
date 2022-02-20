@@ -1,0 +1,13 @@
+﻿
+    @if (!String.IsNullOrEmpty(TipoResumido) && TipoResumido != SD.EstadoRotatividad.FIJO.ToString())
+    {
+    <img src="/iconosPuesto/iconEstados/@RutaTipoResumido()" class="imgEstadoIndicador" alt="img" />
+     }
+
+@code {
+    [Parameter]
+    public string TipoResumido { get; set; }
+
+    string RutaTipoResumido() => $"{TipoResumido}.png";
+   
+}

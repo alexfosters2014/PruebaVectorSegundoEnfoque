@@ -1,0 +1,114 @@
+﻿@page "/"
+@layout EmptyLayout
+@inject ILocalStorageService localStorage
+@inject NavigationManager nav
+@inject IJSRuntime js
+@inject IServiceUsuario serviceUSuario
+@inject ServiceInicializar serviceInicializar;
+
+<div class="form-login-body">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-9 mx-auto login-desk" style="height:100vh">
+                <div class="row">
+
+                    <div class="col-md-5 loginform">
+                        <div class="log-txt row no-margin">
+                            <h1 style="font-family: 'Gabriola';font-weight:bold">Vector 1.0 </h1>
+                            <h1 style="font-family: 'Gabriola';font-size:1.5rem">Login</h1>
+
+                        </div>
+
+                        <div class="login-det">
+                            <img src="images/art-direction.png" alt="" style="border-radius: 10px; box-shadow: 0px 3px 13px 3px rgba(0,0,0,0.75)">
+                        </div>
+                    </div>
+                    <div class="col-md-7 detail-box">
+
+                        <div class="detailsh col-lg-7 col-md-10 col-sm-7 col-11 mx-auto">
+                            <img class="logo" src="images/logo.png" alt="">
+
+                            <EditForm Model="vmLogin" OnValidSubmit="Loguearse">
+                                <DataAnnotationsValidator />
+                                <div class="row form-ro no-margin">
+                                    <InputText @bind-Value="vmLogin.Usuario" id="usuario" class="form-control form-control" placeholder="Ingrese su usuario" />
+                                    <ValidationMessage For="@( () => vmLogin.Usuario)" />
+                                </div>
+
+                                <div class="row form-ro no-margin">
+                                    <InputText type="password" @bind-Value="vmLogin.Password" id="rut" class="form-control form-control" placeholder="Ingrese su contraseña" />
+                                    <ValidationMessage For="@( () => vmLogin.Password)" />
+                                </div>
+                                <div class="row form-ro fgbh">
+
+                                    <div class="col-6">
+                                        <button type="submit" class="btn btn-sm btn-primary">Loguearme</button>
+                                    </div>
+                                    <div class="col-6">
+                                        <a href="">Olvidé mi contraseña</a>
+                                    </div>
+                                </div>
+                            </EditForm>
+                            <div class="row form-ro hlio fgbh">
+                                <div class="col-md-12">
+                                    <p>CopyRigth</p>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@code{
+    private VMLogin vmLogin = new VMLogin();
+    private UsuarioDTO usuarioDTO;
+
+    protected async override Task OnInitializedAsync()
+    {
+        try {
+            bool resultado = await serviceInicializar.PrecargaDatos();
+        }
+        catch (Exception ex)
+        {
+            await js.MsgError(ex.Message);
+        }
+    }
+
+    private async void Loguearse()
+    {
+        UsuarioDTO usuarioDTO = null;
+        try
+        {
+           
+            usuarioDTO = await serviceUSuario.Login(vmLogin);
+            if (usuarioDTO != null)
+            {
+                await localStorage.SetItemAsync(SD.LocalUsuario, usuarioDTO);
+
+                if (vmLogin.Password.Length > 20)
+                {
+                    //nav.NavigateTo("/CambioPass");
+                    nav.NavigateTo("/Index");
+                }
+                else
+                {
+                    nav.NavigateTo("/Index");
+                }
+            }
+            else
+            {
+                await js.MsgError("No se ha podido iniciar sesion. Verifique usuario y contraseña, o en su defecto la conexion a internet");
+            }
+        }
+        catch (Exception ex)
+        {
+            await js.MsgError(ex.Message);
+        }
+    }
+
+}

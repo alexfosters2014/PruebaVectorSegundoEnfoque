@@ -1,0 +1,48 @@
+﻿
+@if (Icon == "add")
+{
+    <img src="/icons/add.png" class="botonPDFVisor" title="@Titulo" />
+}
+@if (Icon == "addChico")
+{
+    <img src="/icons/add.png" class="imgTable" title="@Titulo" />
+}
+@if (Icon == "delete")
+{
+    <img src="/icons/delete.png" class="imgTable" title="@Titulo" />
+}
+@if (Icon == "BAJA_DEFINITIVA")
+{
+    <img src="/icons/false.png" class="imgTable" title="@Titulo" />
+}
+@if (Icon == "BAJA_PARA_LIQUIDACION")
+{
+    <img src="/icons/bajaParcial.png" class="imgTable" title="@Titulo" />
+}
+@if (Icon == "ACTIVO")
+{
+    <img src="/icons/true.png" class="imgTable" title="@Titulo" />
+}
+@if (Icon == "ver")
+{
+    <img src="/icons/eye.png" class="imgTable" title="@Titulo" />
+}
+@if (Icon == "editar")
+{
+    <img src="/icons/edit.png" class="imgTable" title="@Titulo" />
+}
+@if (Icon == "preferenciaFunServicio")
+{
+    <img src="/icons/PreferenciaFunServicio.png" class="imgTable" title="@Titulo" />
+}
+@if (Icon == "HistoricoServicio")
+{
+    <img src="/icons/HistorialServicio.png" class="imgTable" title="@Titulo" />
+}
+@code{
+    [Parameter]
+    public string Icon { get; set; }
+
+    [Parameter]
+    public string Titulo { get; set; }
+}

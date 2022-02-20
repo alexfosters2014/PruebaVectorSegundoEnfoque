@@ -1,0 +1,86 @@
+﻿@inject ServiceEscalafon serviceEscalafon
+@inject IJSRuntime js
+@inject IToastService toastService
+
+<SfDialog Width="650px" Target="#target" IsModal="true" @bind-Visible="Visibilidad">
+    <DialogTemplates>
+        <Header> Seleccionar Funcionario Operativo </Header>
+        <Content>
+             <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1" 
+                                        @onclick="() => ElegirTipoResumido(SD.EstadoRotatividad.RETEN.ToString())" checked>
+                  <label class="form-check-label" for="flexRadioDefault1" style="margin-right:25px;">
+                    RETEN
+                  </label>
+                
+                  <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault2" 
+                                        @onclick="() => ElegirTipoResumido(SD.EstadoRotatividad.PUNTUAL.ToString())">
+                  <label class="form-check-label" for="flexRadioDefault2">
+                    PUNTUAL
+                  </label>
+                </div>
+                <BusquedaFuncionario DevolverFuncionarioDTO="DevolverFuncionario"
+                                     Busqueda=""
+                                     FuncionariosDTO="new()"/>
+        </Content>
+    </DialogTemplates>
+    <DialogButtons>
+        <DialogButton Content="Cerrar" IsPrimary="true" OnClick="@CerrarModalActual" />
+    </DialogButtons>
+    @*<DialogEvents OnOpen="@DialogOpen" Closed="@DialogClose" OnOverlayModalClick="@OverlayClick"></DialogEvents>*@
+    <DialogAnimationSettings Effect="@DialogEffect.Fade"></DialogAnimationSettings>
+</SfDialog>
+<style>
+    #target {
+        max-height: 800px;
+        height: 100%;
+    }
+</style>
+@code {
+    [Parameter]
+    public bool Visibilidad { get; set; }
+
+    [Parameter]
+    public EventCallback<FuncionarioFecha> ObtenerFuncionarioFechaDTO { get; set; }
+
+    [Parameter]
+    public EventCallback CerrarModal { get; set; }
+
+    private string busqueda;
+    private string tipoResumido = "RETEN";
+
+    private List<FuncionarioDTO> funcionariosDTO = new();
+
+    private void ElegirTipoResumido(string tipo)
+    {
+        tipoResumido = tipo;
+    }
+    private async Task CerrarModalActual()
+    {
+        await CerrarModal.InvokeAsync();
+    }
+    private async Task BuscarFuncionario()
+    {
+        if (string.IsNullOrEmpty(busqueda))
+        {
+            toastService.ShowWarning("No puede estar vacio", "Advertencia");
+            return;
+        }
+        GeneralTransport buscar = new()
+            {
+                Data = busqueda,
+                Valor = serviceEscalafon.IdMesaOperativaEnPlanificacion
+            };
+        funcionariosDTO = await serviceEscalafon.BusquedaFuncionario(buscar);
+    }
+    private async Task DevolverFuncionario(FuncionarioDTO funcionarioDTO)
+    {
+        FuncionarioFecha funcionarioFecha = new()
+            {
+                FuncionarioDto = funcionarioDTO,
+                TipoResumido = tipoResumido
+            };
+        await ObtenerFuncionarioFechaDTO.InvokeAsync(funcionarioFecha);
+    }
+
+}

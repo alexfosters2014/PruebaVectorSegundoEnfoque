@@ -1,0 +1,447 @@
+﻿/*.e-dialog{
+    background-color: white;
+    opacity:0.2;
+}*/
+input[type="file"] {
+    display: none;
+}
+
+.estiloTituloServicio {
+    color: white;
+    font-size:1.2rem;
+    font-weight: 700;
+    background: linear-gradient(0deg, rgba(129,107,200,1) 0%, rgba(89,37,133,1) 78%);
+    border-radius:5px;
+    line-height:45px;
+}
+.btonDeshabilitado {
+    filter: grayscale(100%);
+    filter: opacity(.3);
+}
+footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 40px;
+}
+.pointerNullHover{
+    pointer-events:none;
+}
+.estiloTituloBolsa {
+    color: white;
+    font-size: 1.2rem;
+    font-weight: 700;
+    background: linear-gradient(0deg, rgba(214,110,121,1) 0%, rgba(170,27,41,1) 74%);
+    border-radius: 5px;
+    line-height: 45px;
+    text-align: center;
+}
+.estiloTituloTurno {
+    color: orangered;
+    font-size: 0.7rem;
+    background-color: #cfcfcf;
+    border-radius: 4px;
+}
+
+.inputFile {
+    padding: 10px 5px;
+    width: 200px;
+    background-color: green;
+    color: white;
+    text-transform: uppercase;
+    display: block;
+    margin-top: 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.5s;
+    border: 1px solid blueviolet;
+    border-radius: 5px;
+}
+.BordeSegundoNivel {
+    border: orange 4px dashed !important;
+    border-radius: 4px;
+}
+.tamanioFuenteEstado tr td{
+    font-size: 0.8rem !important;
+}
+.tamanioFuenteVisor tr td {
+    font-size: 12px !important;
+}
+.tamanioMargenPref tr td input{
+    margin-bottom:0 !important;
+}
+.tamanioFuenteEstado tr:hover {
+        background: linear-gradient(286deg, rgba(232,221,245,1) 0%, rgba(193,163,208,1) 69%) !important;
+}
+.inputFile:hover {
+    background-color: rgb(51, 204, 51);
+}
+
+.imgUpload {
+    height: 25px;
+    width: auto;
+}
+.textoEstado{
+    font-size:1rem;
+
+}
+input[type="file"] {
+    display: none;
+}
+.borderActive:focus {
+    border: 1px solid #c2c2c2 !important;
+}
+a{
+    background-color:transparent !important;  
+}
+.btn-disabled,
+.btn-disabled[disabled] {
+    opacity: .4;
+    cursor: default !important;
+    pointer-events: none;
+}
+.colorDark {
+    background-color: #DFDFDF !important;
+    border: white 2px solid !important;
+    border-radius: 5px !important;
+}
+.inputFile {
+    padding: 10px 5px;
+    width: 200px;
+    background-color: green;
+    color: white;
+    text-transform: uppercase;
+    display: block;
+    margin-top: 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.5s;
+    border: 1px solid blueviolet;
+    border-radius: 5px;
+}
+.imgUpload {
+    height: 25px;
+    width: auto;
+}
+
+    .inputFile:hover {
+        background-color: rgb(51, 204, 51);
+    }
+.botonCuadradoGrande {
+    height: 200px;
+    width: 200px;
+    background: rgb(136,150,203);
+    background: linear-gradient(0deg, rgba(136,150,203,1) 0%, rgba(11,107,222,1) 100%);
+    color: white;
+    font-size: 25px;
+    font-weight: bold;
+    padding: 15px;
+    margin: 20px;
+    border-radius: 10px;
+    -webkit-box-shadow: -10px 0px 13px -7px #000000, 10px 0px 13px -7px #000000, 5px 5px 15px 5px rgba(0,0,0,0);
+    box-shadow: -10px 0px 13px -7px #000000, 10px 0px 13px -7px #000000, 5px 5px 15px 5px rgba(0,0,0,0);
+}
+
+    .botonCuadradoGrande:active {
+        background: none;
+        color: blueviolet;
+    }
+
+    .botonCuadradoGrande:hover {
+        background: rgb(136,150,203);
+        background: linear-gradient(0deg, rgba(136,150,203,1) 0%, rgba(8,60,122,1) 100%);
+    }
+.my-custom-scrollbar {
+    position: relative;
+    height: 200px;
+    overflow: auto;
+}
+.scrolVertical {
+    height: 90vh;
+    border: 1px solid #ddd;
+    background: #f1f1f1;
+    overflow-y: auto;
+}
+.table-wrapper-scroll-y {
+    display: block;
+}
+select {
+    background-image: url(../icons/flecha.png); /*aquí deberás escribir la ruta de la imagen que utilizarás como flecha del desplegable*/
+    background-repeat: no-repeat;
+    background-position: right center;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    -o-appearance: none;
+    appearance: none;
+}
+.contador{
+    padding:0 15px;
+    color: orangered;
+    font-size:14px;
+    vertical-align:top;
+}
+select::-ms-expand {
+    display: none; /*Evita que se muestre la flecha por defecto en versiones de IE*/
+}
+.inputFile{
+    padding:10px 5px;
+    width:200px;
+    background-color: green;
+    color:white;
+    text-transform:uppercase;
+    display:block;
+    margin-top:10px;
+    text-align:center;
+    cursor:pointer;
+    transition: 0.5s;
+    border:1px solid blueviolet;
+    border-radius:5px;
+}
+td,th,label,input,select{
+    font-size:14px !important;
+}
+.inputFile:hover {
+    background-color: rgb(51, 204, 51);
+}
+.imgUpload{
+    height:25px;
+    width:auto;
+}
+thead {
+    background-color: rgba(109, 171, 211, 0.3);
+}
+table{
+    border-radius:15px !important;
+}
+.spanRojo{
+    color:red;
+    font-weight:bold;
+}
+input[type="radio"] {
+    width: 20px;
+    height: 20px;
+    margin-top: 15px;
+    margin-bottom: 10px;
+}
+.labelRadio {
+    margin-top: 14px;
+    margin-left:7px;
+}
+img.nuevoBoton {
+    height: 60px;
+    width: 60px;
+    transition: 0.5s;
+}
+img.nuevoBoton:hover{
+    height: 70px;
+    width: 70px;
+}
+    img.indicadores {
+        height: 20px;
+        width: 20px;
+    }
+img.botonChico {
+    height: 40px;
+    width: 40px;
+}
+.recuadroLogin {
+    -webkit-box-shadow: 5px 5px 21px 2px rgba(0,0,0,0.79);
+    box-shadow: 5px 5px 21px 2px rgba(0,0,0,0.79);
+    border: 1px solid;
+    border-color: rgb(220,227,200);
+    padding: 30px;
+    border-radius: 20px;
+    background-image: url(../img/login.png);
+    background-repeat:no-repeat;
+    background-size:contain;
+    width:500px;
+}
+.recuadroPlanificacion {
+    -webkit-box-shadow: 5px 5px 21px 2px rgba(0,0,0,0.79);
+    box-shadow: 5px 5px 21px 2px rgba(0,0,0,0.79);
+    border: 1px solid;
+    border-color: rgb(220,227,200);
+    padding: 30px;
+    border-radius: 20px;
+}
+.recuadroPass {
+    -webkit-box-shadow: 5px 5px 21px 2px rgba(0,0,0,0.79);
+    box-shadow: 5px 5px 21px 2px rgba(0,0,0,0.79);
+    border: 1px solid;
+    border-color: rgb(220,227,200);
+    padding: 30px;
+    border-radius: 20px;
+    background-image: url(../img/candado.png);
+    background-repeat: no-repeat;
+    background-size: contain;
+    width: 500px;
+}
+.celdaNoDependienteTexto{
+    table-layout:fixed !important;
+}
+
+.celdaNoDependienteTexto td{
+    padding:2px 0 !important;
+   /* border-spacing:2px !important;*/
+}
+tr.colorFila {
+    background-color: white;
+}
+.recuadro {
+    border: 1px solid;
+    border-color: rgb(220,227,200);
+    border-radius: 15px;
+    box-shadow: 5px 7px 10px 0px rgba(15,15,15,0.17);
+    -webkit-box-shadow: 5px 7px 10px 0px rgba(15,15,15,0.17);
+    -moz-box-shadow: 5px 7px 10px 0px rgba(15,15,15,0.17);
+    padding: 10px;
+}
+.recuadroAutorizaciones {
+    border: 1px solid;
+    border-color: rgb(200,202,200);
+    border-radius: 15px;
+    box-shadow: 5px 7px 10px 0px rgba(15,15,15,0.17);
+    -webkit-box-shadow: 5px 7px 10px 0px rgba(15,15,15,0.17);
+    -moz-box-shadow: 5px 7px 10px 0px rgba(15,15,15,0.17);
+    padding: 20px 15px;
+    margin-bottom: 37px;
+}
+.recuadroPorteria {
+    border: 1px solid;
+    border-color: rgb(220,227,200);
+    border-radius: 15px;
+    box-shadow: 5px 7px 10px 0px rgba(15,15,15,0.17);
+    -webkit-box-shadow: 5px 7px 10px 0px rgba(15,15,15,0.17);
+    -moz-box-shadow: 5px 7px 10px 0px rgba(15,15,15,0.17);
+    padding: 10px;
+    margin-bottom: 20px;
+}
+.botonEspecial {
+    -webkit-box-shadow: 2px 2px 15px 2px rgba(0,0,0,0.79);
+    box-shadow: 2px 2px 15px 2px rgba(0,0,0,0.79);
+    border: 1px solid;
+    border-color: rgb(220,227,200);
+    padding: 30px;
+    border-radius: 20px;
+    background-image: url(../img/fondoBoton.jpg);
+    background-repeat: no-repeat;
+    background-size: cover;
+    width: 150px;
+    margin-right: 30px;
+}
+.textoClaro{
+    color:white;
+    font-weight:500;
+}
+.divider {
+    padding-top: 30px;
+}
+.dividerLogin {
+    padding-top: 120px;
+}
+.imgTablePresentacion {
+    height: 60px;
+    width: 60px;
+}
+.imgTable {
+    height: 30px;
+    width: 30px;
+}
+.imgForm {
+    height: 32px;
+    width: 32px;
+    overflow:hidden;
+}
+    .imgForm:hover {
+        filter: saturate(180%);
+        -webkit-transform: scale(1.2);
+        transform: scale(1.2);
+    }
+.imgEstado {
+    height: 20px !important;
+    width: 20px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+.imgEstadoBanderaSegundoNivel {
+    height: 20px !important;
+    width: 20px !important;
+    padding: 0 !important;
+}
+.imgEstadoBanderaSegundoNivel:hover {
+        filter: hue-rotate(60deg) brightness(150%);
+}
+.imgEstadoIndicador {
+    height: 18px !important;
+    width: 18px !important;
+    padding: 0 !important;
+    margin-right:2px !important;
+}
+.imgEstadoIndicadorFechasiguiente {
+    height: 10px !important;
+    width: 10px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.botonPDFVisor {
+    height: 50px;
+    width: 50px;
+    transition: 0.5s;
+}
+.botonPDFVisor:hover {
+    -webkit-filter: invert(30%);
+    filter: invert(30%);
+}
+.iconTabla {
+    height: 40px;
+    width: 40px;
+    transition: 0.3s;
+}
+
+    .iconTabla:hover {
+        height: 50px;
+        width: 50px;
+        filter: contrast(200%);
+    }
+.botonExport {
+    height: 70px;
+    width: auto;
+    transition: 0.3s;
+}
+.botonExport:hover {
+    -webkit-filter: invert(30%);
+    filter: invert(30%);
+}
+
+.fondo {
+    background: url("../img/fondo.jpg") no-repeat center center fixed;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+}
+h1,h2, h3, h4, h5, h6 {
+    color: rgb(255, 36, 36);
+}
+
+.myScrollBar {
+    height: calc(100vh - 50px);
+    overflow-y: auto;
+    overflow-x: scroll;
+    margin-top: 5px;
+}
+.listPorteria {
+    text-decoration: none;
+    color: black;
+    font-family: 'Roboto', sans-serif;
+    font-size: 18px;
+    border-block-color:blueviolet;
+}
+    .listPorteria:hover {
+        background-color: rgba(135, 135, 135, 0.3);
+        text-decoration: none;
+        color: black;
+        font-family: 'Roboto', sans-serif;
+        font-size: 18px;
+    }

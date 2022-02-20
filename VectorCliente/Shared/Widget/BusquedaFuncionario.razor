@@ -1,0 +1,74 @@
+﻿@inject ServiceEscalafon serviceEscalafon
+@inject IJSRuntime js
+@inject IToastService toastService
+
+ <div class="form-group">
+                <label>Funcionario</label>
+                <input @bind="Busqueda" class="form-control" style="background-color:lightgoldenrodyellow" placeholder="Busque un funcionario" />
+                <button class="btn btn-primary form-control" @onclick="BuscarFuncionario">Buscar</button>
+            </div>
+            <Divider Altura="15px" />
+            @if (FuncionariosDTO != null)
+            {
+                <table class="table table-borderless">
+
+                    @foreach (var fun in FuncionariosDTO)
+                    {
+                        <tr>
+                            <td>@fun.Numero</td>
+                            <td>@fun.Cedula</td>
+                            <td>
+                                <ImgRotativo TipoResumido="@fun.TipoResumido"/>
+                                @fun.ToString()
+                            </td>
+                            <td>
+                                <a href="" @onclick="() => DevolverFuncionario(fun.Id)" @onclick:preventDefault>
+                                    <img src="icons/selector.png" class="imgTable" />
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </table>
+            }
+
+
+@code {
+
+    [Parameter]
+    public EventCallback<FuncionarioDTO> DevolverFuncionarioDTO { get; set; }
+
+    [Parameter]
+    public string Busqueda { get; set; }
+
+    [Parameter]
+    public List<FuncionarioDTO> FuncionariosDTO { get; set; } = new();
+
+
+    private async Task BuscarFuncionario()
+    {
+        if (string.IsNullOrEmpty(Busqueda))
+        {
+            toastService.ShowWarning("El campo no puede estar vacio", "Advertencia");
+            return;
+        }
+        GeneralTransport buscar = new()
+            {
+                Data = Busqueda,
+                Valor = serviceEscalafon.IdMesaOperativaEnPlanificacion
+            };
+        FuncionariosDTO = await serviceEscalafon.BusquedaFuncionario(buscar);
+    }
+
+
+    private async Task DevolverFuncionario(int idFun)
+    {
+        FuncionarioDTO aux = FuncionariosDTO.SingleOrDefault(s => s.Id == idFun);
+        if (aux == null)
+        {
+            await js.MsgAdvertencia("No ha seleccionado ningun funcionario");
+            return;
+        }
+        await DevolverFuncionarioDTO.InvokeAsync(aux);
+    }
+
+}

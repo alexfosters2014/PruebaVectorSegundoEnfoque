@@ -1,0 +1,650 @@
+﻿@page "/Funcionarios"
+@inject ILocalStorageService localStorage
+@inject NavigationManager nav
+@inject IJSRuntime js
+@inject IToastService toastService
+@inject IServiceFuncionario serviceFuncionario
+@inject IServiceRubro serviceRubro
+
+<h3>Mantenimiento de Funcionarios</h3>
+
+<section class="container">
+
+    <div class="row">
+        <article class="col-7">
+            <div class="row pr-2">
+                @if (modelotcMOP != null)
+                {
+                    <div>
+                        <div class="form-group row">
+                            <label for="rubro" class="col-2 col-form-label">Rubro*</label>
+                            <select @bind="@filtro.Rubro" id="rubro" class="form-control col-7">
+                                <option value="*" selected>Todos</option>
+                                @foreach (var ru in modelotcMOP.Rubros)
+                                {
+                                    <option value="@ru.Nombre">@ru.Nombre</option>
+                                }
+                            </select>
+                            <div class="form-check col-3 text-end">
+                                <input class="form-check-input ml-1 mb-0" type="checkbox" @bind-value="filtro.Activo" checked id="flexCheckDefault">
+                                <label class="form-check-label ml-4 mb-0" for="flexCheckDefault">Solo Activos</label>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="busqueda" class="col-2 col-form-label">Busqueda*</label>
+                            <input @bind-value="filtro.Busqueda" id="busqueda" class="form-control col-8" />
+
+                            <div class="col-2 text-center">
+                                <button class="btn btn-primary" @onclick="Buscar">Buscar</button>
+                            </div>
+                        </div>
+
+                        <Divider Altura="5px" />
+                    </div>
+                }
+            </div>
+            <Loading Visibilidad="visibilidadLoading" />
+
+            <!--  <div class="table-wrapper-scroll-y my-custom-scrollbar"> -->
+            <div class="scrolVertical p-3" style="height:65vh">
+                <div class="row">
+                    <table class="table">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th scope="col">Numero</th>
+                                <th scope="col">Cedula</th>
+                                <th scope="col">Funcionario</th>
+                                <th scope="col">Estado</th>
+                                <th scope="col"></th>
+                                <th scope="col"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (funcionariosDTO != null && funcionariosDTO.Any())
+                            {
+                                @foreach (var fun in funcionariosDTO)
+                                {
+                                    <tr>
+                                        <td>@fun.Numero</td>
+                                        <td>@fun.Cedula</td>
+                                        <td>@fun.Nombres @fun.Apellidos</td>
+                                        <td><IconEdit Icon="@fun.EstadoActividad" /></td>
+                                        <td><a href="" @onclick="(() => VerEditar(fun.Id))" @onclick:preventDefault><IconEdit Icon="ver" Titulo="Ver/Editar" /></a></td>
+                                        @if (fun.EstadoActividad != SD.EstadoFuncionarioEnum.BAJA_DEFINITIVA.ToString())
+                                        {
+                                            <td><a href="" @onclick="(() => { ActvarModalBaja(fun.Id, fun.ToString()); })" @onclick:preventDefault><IconEdit Icon="delete" Titulo="Baja" /></a></td>
+                                        }
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+
+
+                    @if (funcionariosDTO != null && funcionariosDTO.Count == 0)
+                    {
+                        <h5 style="color:orangered">No hay coincidencias con los parámetros actuales</h5>
+                    }
+                    <Divider Altura="30px" />
+                    <div class="d-flex justify-content-center">
+                        <a href="" @onclick="NuevoFuncionario" @onclick:preventDefault><IconEdit Icon="add" Titulo="Agregar" /></a>
+                    </div>
+                    <Divider Altura="50px" />
+                </div>
+
+            </div>
+
+
+        </article>
+        <!-- Registro de funcionarios -->
+        <article class="col-5 scrolVertical text-center align-items-center">
+            @if (aparecer)
+            {
+                <h3 class="text-center" style="padding:5px;">Funcionario</h3>
+                <p style="color: red; margin-bottom: 10px; font-size: 0.7rem;">Ultima actualización: @funcionario.UltimaActualizacion</p>
+
+                <EditForm Model="funcionario" OnValidSubmit="NuevoActualizarFuncionario">
+                    <DataAnnotationsValidator />
+                    <div class="form-group row">
+                        <label for="Numeroo" class="col-4 col-form-label">Número</label>
+                        <input type="number" @bind="funcionario.Numero" id="Numeroo" class="col-7 form-control" />
+                        <ValidationMessage For="@( () => funcionario.Numero)" />
+                    </div>
+                    <div class="form-group row">
+                        <label for="cedula" class="col-4 col-form-label">Cedula*</label>
+                        <InputText @bind-Value="funcionario.Cedula" id="cedula" class="col-6 form-control" />
+                        <ValidationMessage For="@( () => funcionario.Cedula)" />
+                        <a href="" @onclick="ComprobarDuplicado" @onclick:preventDefault class="col-2">
+                            <img src="/icons/@imagenReingreso" class="imgForm" />
+                        </a>
+                    </div>
+                    <div class="form-group row">
+                        <label for="nombre" class="col-4 col-form-label">Nombres*</label>
+                        <InputText @bind-Value="funcionario.Nombres" id="nombre" class="col-7 form-control" />
+                        <ValidationMessage For="@( () => funcionario.Nombres)" />
+                    </div>
+                    <div class="form-group row">
+                        <label for="apellido" class="col-4 col-form-label">Apellidos*</label>
+                        <InputText @bind-Value="funcionario.Apellidos" id="apellido" class="col-7 form-control" />
+                        <ValidationMessage For="@( () => funcionario.Apellidos)" />
+                    </div>
+                    <div class="form-group row">
+                        <label for="fechanac" class="col-4 col-form-label">Fecha de Nacimiento*</label>
+                        <InputDate @bind-Value="funcionario.FechaNacimiento" id="fechanac" class="col-7 form-control" />
+                        <ValidationMessage For="@( () => funcionario.FechaNacimiento)" />
+                    </div>
+                    <div class="form-group row">
+                        <label for="telefono" class="col-4 col-form-label">Telefono</label>
+                        <InputText @bind-Value="funcionario.Telefono" id="telefono" class="col-7 form-control" />
+                        <ValidationMessage For="@( () => funcionario.Telefono)" />
+                    </div>
+                    <div class="form-group row">
+                        <label for="celular" class="col-4 col-form-label">Celular</label>
+                        <InputText @bind-Value="funcionario.Celular" id="celular" class="col-7 form-control" />
+                        <ValidationMessage For="@( () => funcionario.Celular)" />
+                    </div>
+                    <div class="form-group row">
+                        <label for="direccion" class="col-4 col-form-label">Dirección*</label>
+                        <InputText @bind-Value="funcionario.Direccion" id="direccion" class="col-7 form-control" />
+                        <ValidationMessage For="@( () => funcionario.Direccion)" />
+                    </div>
+                    <div class="form-group row">
+                        <label for="zona" class="col-4 col-form-label">Barrio/Zona</label>
+                        <InputText @bind-Value="funcionario.Zona" id="zona" class="col-7 form-control" />
+                        <ValidationMessage For="@( () => funcionario.Zona)" />
+                    </div>
+                    <div class="form-group row">
+                        <label for="dep" class="col-4 col-form-label">Departamento*</label>
+                        <select @bind="@funcionario.DepartamentoOperativo" id="dep" class="col-7 form-control">
+                            <option value="ninguno">Ninguno</option>
+                            @foreach (var dep in Enum.GetValues(typeof(SD.DepartamentosEnum)))
+                            {
+                                if (funcionario.Id > 0)
+                                {
+                                    if (funcionario.DepartamentoOperativo == dep.ToString())
+                                    {
+                                        <option value="@dep" selected>@(dep.ToString().Replace("_", " "))</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@dep">@(dep.ToString().Replace("_", " "))</option>
+                                    }
+                                }
+                                else
+                                {
+                                    <option value="@dep">@(dep.ToString().Replace("_", " "))</option>
+
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group row">
+                        <label for="email" class="col-4 col-form-label">Email</label>
+                        <InputText @bind-Value="funcionario.Email" id="email" class="col-7 form-control" />
+                        <ValidationMessage For="@( () => funcionario.Email)" />
+                    </div>
+                    <div class="form-group row">
+                        <label for="fechai" class="col-4 col-form-label">Fecha de Ingreso*</label>
+                        <InputDate @bind-Value="funcionario.FechaIngreso" id="fechai" class="col-7 form-control" />
+                        <ValidationMessage For="@( () => funcionario.FechaIngreso)" />
+                    </div>
+                    <div class="form-group row">
+                        <label for="tipoc" class="col-4 col-form-label">Tipo Contrato*</label>
+                        <select @bind="@IdContrato" id="tipoc" class="col-5 form-control">
+                            <option value="0" selected>Ninguno</option>
+                            @foreach (var tc in modelotcMOP.TiposContratos)
+                            {
+                                @if (funcionario.Id > 0)
+                                {
+                                    if (funcionario.TipoContrato.Id == tc.Id)
+                                    {
+                                        <option value="@tc.Id" selected>@tc.Descripcion</option>
+
+                                    }
+                                    else
+                                    {
+                                        <option value="@tc.Id">@tc.Descripcion</option>
+                                    }
+                                }
+                                else
+                                {
+                                    <option value="@tc.Id">@tc.Descripcion</option>
+                                }
+                            }
+                        </select>
+                        <a href="" class="col-2 justify-content-end" @onclick="NuevoTipoContrato" @onclick:preventDefault><IconEdit Icon="addChico" /></a>
+                    </div>
+                    <div class="form-group row">
+                        <label for="vtocs" class="col-4 col-form-label">Vto Carne de Salud</label>
+                        <InputDate @bind-Value="funcionario.VtoCarneSalud" id="vtocs" class="col-7 form-control" />
+                    </div>
+                    <div class="form-group row">
+                        <label for="fechaemision" class="col-4 col-form-label">Fecha emision CAJ</label>
+                        <InputDate @bind-Value="funcionario.FechaEmisionCAJ" id="fechaemision" class="col-7 form-control" />
+                    </div>
+                    <div class="form-group row">
+                        <label for="sueldo" class="col-4 col-form-label">Sueldo Nominal</label>
+                        <InputNumber @bind-Value="funcionario.SueldoNominal" id="sueldo" class="col-7 form-control" step=".01" />
+                        <ValidationMessage For="@( () => funcionario.SueldoNominal)" />
+                    </div>
+                    <div class="form-group row">
+                        <label for="mesaop" class="col-4 col-form-label">Responde a*</label>
+                        <select @bind="@IdMesaOp" id="mesaop" class="col-7 form-control">
+                            <option value="0" selected>Ninguno</option>
+                            @foreach (var mop in modelotcMOP.MesasOperativas)
+                            {
+                                @if (funcionario.Id > 0)
+                                {
+                                    if (funcionario.RespondeA.Id == mop.Id)
+                                    {
+                                        <option value="@mop.Id" selected>@mop.Nombre (@mop.Descripcion)</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@mop.Id">@mop.Nombre (@mop.Descripcion)</option>
+                                    }
+                                }
+                                else
+                                {
+                                    <option value="@mop.Id">@mop.Nombre (@mop.Descripcion)</option>
+                                }
+
+                            }
+                        </select>
+                    </div>
+
+                    @if (funcionario.EstadoActividad != SD.EstadoFuncionarioEnum.ACTIVO.ToString() && funcionario.Id > 0)
+                    {
+                        <div class="form-group row">
+                            <label for="Fegreso" class="col-4 col-form-label">Fecha Baja</label>
+                            <InputDate @bind-Value="funcionario.FechaEgreso" id="Fegreso" class="col-7 form-control" />
+                        </div>
+                    }
+                    <div class="form-group row">
+                        <label for="ObservacionesFun" class="col-4 col-form-label">Observaciones</label>
+                        <InputText @bind-Value="funcionario.Observaciones" id="ObservacionesFun" class="col-7 form-control" />
+                    </div>
+                    <div class="form-group row">
+                        <label for="habArmadoFun" class="col-4 col-form-label">Habilitado para armado</label>
+                        <SfSwitch @bind-Checked="funcionario.habArmado"></SfSwitch>
+                    </div>
+                    @if (funcionario.Id > 0)
+                    {
+                        <div class="form-group row">
+                            <label for="estadoInhab" class="col-4 col-form-label">Estado Actividad</label>
+                            <InputText @bind-Value="funcionario.EstadoActividad" id="estadoInhab" class="col-7 form-control" readonly />
+                        </div>
+                    }
+                    <div class="form-group row">
+                        <label for="mesaopFun" class="col-4 col-form-label">Rubro*</label>
+                        <select @bind="@IdRubroSeleccionado" id="mesaopFun" class="col-5 form-control">
+                            @if (modelotcMOP.Rubros != null)
+                            {
+                                <option value="0" selected>Ninguno</option>
+                                @foreach (var ru in modelotcMOP.Rubros)
+                                {
+                                    if (funcionario.Id > 0)
+                                    {
+                                        if (funcionario.Rubro.Id == ru.Id)
+                                        {
+                                            <option value="@ru.Id" selected>@ru.Nombre (@ru.Grupo/@ru.SubGrupo)</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@ru.Id">@ru.Nombre (@ru.Grupo/@ru.SubGrupo)</option>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <option value="@ru.Id">@ru.Nombre (@ru.Grupo/@ru.SubGrupo)</option>
+                                    }
+                                }
+                            }
+                        </select>
+                        <a href="" class="col-2 justify-content-end" @onclick="ActvarModalRubro" @onclick:preventDefault><IconEdit Icon="addChico" Titulo="Agregar"/></a>
+                    </div>
+                   
+
+                        <div class="form-group row">
+                        <label for="tipoResumido" class="col-4 col-form-label">Tipo Resumido*</label>
+                        <select @bind="funcionario.TipoResumido" id="tipoResumido" class="col-7 form-control">
+                            <option value="0" selected>Ninguno</option>
+                            @foreach (var tipoRes in Enum.GetValues(typeof(SD.EstadoRotatividad)))
+                            {
+                                    if (tipoRes.ToString() == funcionario.TipoResumido)
+                                    {
+                                        <option value="@tipoRes.ToString()" selected>@tipoRes.ToString()</option>
+                                    }
+                                    else
+                                    {
+                                      <option value="@tipoRes.ToString()">@tipoRes.ToString()</option>
+                                    }
+                            }
+                        </select>
+                    </div>
+                    @*<div class="form-group row">
+                        <label for="rotativo" class="col-4 col-form-label">Funcionario Rotativo</label>
+                        <SfSwitch @bind-Checked="funcionario.Rotativo"></SfSwitch>
+                    </div>*@
+
+                     <div class="col text-center">
+                        @if (funcionario.EstadoActividad == SD.EstadoFuncionarioEnum.ACTIVO.ToString())
+                        {
+                            <button type="submit" class="btn btn-primary mr-1">@tituloBoton</button>
+                        }
+                        <button type="button" class="btn btn-primary ml-1" @onclick="Cancelar">Cancelar</button>
+                    </div>
+
+                </EditForm>
+                <Divider Altura="100px" />
+            }
+        </article>
+    </div>
+</section>
+
+<ModalRubro CrearRubro="NuevoRubro" 
+            Visibilidad="visibilidadRubro" 
+            CerrarModal="HiddenModal" 
+            RubroNuevoDTO="new RubroDTO()" />
+
+<ModalBajaFuncionario BajaDefinitiva="BajaDefinitiva" 
+                      modelBajaFuncionarioDTO="modelBaja" 
+                      CerrarModal="HiddenModal" 
+                      Visibilidad="visibilidadBaja"/>
+
+
+@code {
+    private UsuarioDTO usuarioLogueado;
+    private ModelFunContratosMop modelotcMOP;
+    private List<FuncionarioDTO> funcionariosDTO;
+    private FuncionarioDTO funcionario = new FuncionarioDTO();
+    private bool aparecer = false;
+    private int IdContrato = 0;
+    private int IdMesaOp = 0;
+    private FiltroBusquedaFuncionario filtro;
+    private string tituloBoton;
+    private int IdRubroSeleccionado = 0;
+    private string imagenReingreso = "duplicado.png";
+    private bool nuevoFuncionario = true;
+
+    private bool visibilidadRubro = false;
+    private bool visibilidadBaja = false;
+    private bool visibilidadLoading = false;
+    private ModelBajaFuncionario modelBaja = new();
+
+    protected async override Task OnInitializedAsync()
+    {
+        try
+        {
+            usuarioLogueado = await localStorage.GetItemAsync<UsuarioDTO>(SD.LocalUsuario);
+            if (usuarioLogueado == null)
+            {
+                nav.NavigateTo("/", true);
+                return;
+            }
+            filtro = new FiltroBusquedaFuncionario();
+            modelotcMOP = await serviceFuncionario.ObtenerTipoContratosMOP(usuarioLogueado.Token);
+            filtro.Activo = true;
+            filtro.Rubro = "*";
+
+            var itemFuncionario = await localStorage.GetItemAsync<FuncionarioDTO>(SD.LocalFuncionario);
+            if (itemFuncionario != null)
+            {
+                funcionario = itemFuncionario;
+                aparecer = true;
+                tituloBoton = "Agregar";
+                await localStorage.RemoveItemAsync(SD.LocalFuncionario);
+            }
+        }
+        catch (Exception ex)
+        {
+            await js.MsgError(ex.Message);
+        }
+    }
+
+    private async Task Buscar()
+    {
+        if (string.IsNullOrEmpty(filtro.Busqueda))
+        {
+            await js.MsgAdvertencia("No puede contener campos vacios");
+            return;
+        }
+
+        try
+        {
+            visibilidadLoading = true;
+            funcionariosDTO = await serviceFuncionario.ObtenerFiltro(filtro, usuarioLogueado.Token);
+            visibilidadLoading = false;
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            visibilidadLoading = false;
+            await js.MsgError(ex.Message);
+        }
+    }
+
+    private async Task VerEditar(int id)
+    {
+        try
+        {
+            funcionario = funcionariosDTO.Single(w => w.Id == id);
+            IdContrato = funcionario.TipoContrato.Id;
+            IdMesaOp = funcionario.RespondeA.Id;
+            IdRubroSeleccionado = funcionario.Rubro.Id;
+            nuevoFuncionario = false;
+            aparecer = true;
+            tituloBoton = "Actualizar";
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            await js.MsgError(ex.Message);
+        }
+    }
+
+    private async Task BajaDefinitiva(ModelBajaFuncionario modelBaja)
+    {
+        try
+        {
+            bool baja = await serviceFuncionario.Eliminar(modelBaja, usuarioLogueado.Token);
+            await js.MsgExitoso("Se ha dado de baja al funcionario seleccionado");
+            await Buscar();
+            visibilidadBaja = false;
+        }
+        catch (Exception ex)
+        {
+            await js.MsgError(ex.Message);
+        }
+    }
+
+    private void NuevoFuncionario()
+    {
+        imagenReingreso = "duplicado.png";
+        funcionario = new FuncionarioDTO();
+        funcionario.Id = 0;
+        funcionario.EstadoActividad = SD.EstadoFuncionarioEnum.ACTIVO.ToString();
+        tituloBoton = "Agregar";
+        nuevoFuncionario = true;
+        aparecer = true;
+        IdContrato = 0;
+        IdMesaOp = 0;
+        IdRubroSeleccionado = 0;
+        StateHasChanged();
+    }
+
+    private async Task NuevoActualizarFuncionario()
+    {
+        try
+        {
+            if (IdContrato == 0)
+            {
+                await js.MsgAdvertencia("Debe seleccionar un contrato de trabajo");
+                return;
+            }
+            if (IdMesaOp == 0)
+            {
+                await js.MsgAdvertencia("Debe seleccionar una mesa operativa");
+                return;
+            }
+            if (funcionario.DepartamentoOperativo == null || funcionario.DepartamentoOperativo == "ninguno")
+            {
+                await js.MsgAdvertencia("Debe seleccionar un departamento");
+                return;
+            }
+            if (IdRubroSeleccionado == 0)
+            {
+                await js.MsgAdvertencia("Debe seleccionar un rubro");
+                return;
+            }
+             if (funcionario.TipoResumido == "0")
+            {
+                await js.MsgAdvertencia("Debe seleccionar un un tipo resumido");
+                return;
+            }
+            funcionario.Rubro = modelotcMOP.Rubros.Find(f => f.Id == IdRubroSeleccionado);
+            funcionario.RespondeA = modelotcMOP.MesasOperativas.Find(f => f.Id == IdMesaOp);
+            funcionario.TipoContrato = modelotcMOP.TiposContratos.Find(f => f.Id == IdContrato);
+            funcionario.Nombres = funcionario.Nombres.ToUpper();
+            funcionario.Apellidos = funcionario.Apellidos.ToUpper();
+            funcionario.UltimaActualizacion = DateTime.Now.ToString("dd/MM/yyyy HH:mm") + " - " + usuarioLogueado.NombreUsuario;
+
+            if (nuevoFuncionario)
+            {
+                funcionario = await serviceFuncionario.Agregar(funcionario, usuarioLogueado.Token);
+            }
+            else
+            {
+                funcionario = await serviceFuncionario.Actualizar(funcionario, usuarioLogueado.Token);
+            }
+            aparecer = false;
+            await js.MsgExitoso("Registrado exitosamente");
+            funcionario = new FuncionarioDTO();
+            StateHasChanged();
+            //nav.NavigateTo("/Funcionarios", true);
+        }
+        catch (Exception ex)
+        {
+            await js.MsgError(ex.Message);
+        }
+
+    }
+    private void ActvarModalRubro()
+    {
+        visibilidadRubro = true;
+    }
+
+    private void ActvarModalBaja(int idFun, string funcionarioDetalle)
+    {
+        modelBaja.Id = idFun;
+        modelBaja.FechaBaja = DateTime.Today.Date.AddDays(-1);
+        modelBaja.Funcionario = funcionarioDetalle;
+        visibilidadBaja = true;
+    }
+
+    private async Task NuevoRubro(RubroDTO nuevoRurboDTO)
+    {
+        try
+        {
+            if (nuevoRurboDTO == null)
+            {
+                await js.MsgAdvertencia("No hay valores ha ingresar");
+                return;
+            }
+            if (RubroDTO.Validar(nuevoRurboDTO))
+            {
+                var rubroAgregado = await serviceRubro.AgregarNuevo(nuevoRurboDTO, usuarioLogueado.Token);
+                if (rubroAgregado != null)
+                {
+                    modelotcMOP.Rubros.Add(rubroAgregado);
+                    await js.MsgExitoso("Se ha registrado un nuevo rubro");
+                    visibilidadRubro = false;
+                }
+                else
+                {
+                    await js.MsgAdvertencia("No se pudo agregar el rubro");
+                    return;
+                }
+            }
+            else
+            {
+                await js.MsgAdvertencia("Los campos no pueden estar vacios");
+                return;
+            }
+        }
+        catch (Exception ex)
+        {
+            await js.MsgError(ex.Message);
+        }
+    }
+
+    private async Task NuevoTipoContrato()
+    {
+        await localStorage.SetItemAsync(SD.LocalFuncionario, funcionario);
+        nav.NavigateTo("/TipoContrato/Nuevo");
+    }
+
+    private void Cancelar()
+    {
+        aparecer = false;
+        funcionario = new FuncionarioDTO();
+        StateHasChanged();
+    }
+
+    private void HiddenModal()
+    {
+        visibilidadRubro = false;
+        visibilidadBaja = false;
+    }
+    private async Task ComprobarDuplicado()
+    {
+        if (imagenReingreso != "duplicado.png")
+        {
+            return;
+        }
+        if (string.IsNullOrEmpty(funcionario.Cedula))
+        {
+            toastService.ShowWarning("No puede dejar el campo vacio");
+            return;
+        }
+        if (funcionario.Cedula.Length != 8)
+        {
+            toastService.ShowWarning("La cedula no tiene formato correcto");
+            return;
+        }
+
+        string documento = funcionario.Cedula.Substring(0, funcionario.Cedula.Length - 1);
+        string digitoVerificador = funcionario.Cedula.Substring(funcionario.Cedula.Length - 1, 1);
+
+        char[] digitos = documento.ToCharArray();
+
+        int sumaDigitos = 2 * ToInt(digitos[0].ToString()) + 9 * ToInt(digitos[1].ToString()) + 8 * ToInt(digitos[2].ToString())
+        + 7 * ToInt(digitos[3].ToString()) + 6 * ToInt(digitos[4].ToString()) + 3 * ToInt(digitos[5].ToString()) +
+        4 * ToInt(digitos[6].ToString());
+
+        int mod = sumaDigitos % 10;
+        int resultadoaVerificar = (10 - mod) % 10;
+
+
+        if (ToInt(digitoVerificador) == resultadoaVerificar)
+        {
+            imagenReingreso = "loading.gif";
+            GeneralTransport datoDuplicado = new()
+            {
+                Data = funcionario.Cedula
+            };
+            bool esReingreso = await serviceFuncionario.FuncionarioDuplicado(datoDuplicado, usuarioLogueado.Token);
+            if (esReingreso)
+            {
+                toastService.ShowInfo("El funcinoario que quiere ingresar es reingreso");
+            }
+            imagenReingreso = esReingreso ? "esDuplicado.png" : "ok.png";
+        }
+
+    }
+    private int ToInt(string value)
+    {
+        return SD.ConvertStringToInt(value);
+    }
+
+}

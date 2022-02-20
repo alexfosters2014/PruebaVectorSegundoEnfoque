@@ -1,0 +1,92 @@
+﻿@inject ServiceEscalafon serviceEscalafon
+@inject IJSRuntime js
+@inject IToastService toastService
+
+<SfDialog Width="650px" Target="#target" IsModal="true" @bind-Visible="Visibilidad">
+    <DialogTemplates>
+        <Header> Mover a otro Servicio </Header>
+        <Content>
+            <hr />
+            <div class="form-group">
+                <input type="text" @bind="busqueda" class="form-control" placeholder="Buscar Servicio"/>
+                <button class="btn btn-primary" @onclick="BuscarServicios">Buscar</button>
+            </div>
+             <hr />
+             @if (servicios != null)
+            {
+                <table class="table table-borderless">
+
+                    @foreach (var serv in servicios)
+                    {
+                        <tr>
+                            <td>@serv.NombreDescriptivo</td>
+                            <td>@serv.Direccion</td>
+                            <td>
+                                <a href="" @onclick="() => CambioDeServicio(serv)" @onclick:preventDefault>
+                                    <img src="icons/selector.png" class="imgTable" />
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </table>
+              }
+
+        </Content>
+    </DialogTemplates>
+     <DialogButtons>
+        <DialogButton Content="Cerrar" IsPrimary="true" OnClick="@CerrarModalActual" />
+    </DialogButtons>
+       @*<DialogEvents OnOpen="@DialogOpen" Closed="@DialogClose" OnOverlayModalClick="@OverlayClick"></DialogEvents>*@
+    <DialogAnimationSettings Effect="@DialogEffect.Fade"></DialogAnimationSettings>
+</SfDialog>
+<style>
+    #target {
+        max-height: 800px;
+        height: 100%;
+    }
+</style>
+
+
+
+@code {
+    [Parameter]
+    public bool Visibilidad { get; set; }
+
+    [Parameter]
+    public EventCallback<ServicioDTO> CambiarDeServicio { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> CerrarModal { get; set; }
+
+    private string busqueda = "";
+    private ServicioDTO servicioDTO = new();
+    private List<ServicioDTO> servicios = null;
+
+    //protected async override Task OnParametersSetAsync()
+    //{
+    //    return base.OnParametersSetAsync();
+    //}
+
+    private async Task CambioDeServicio(ServicioDTO servicio)
+    {
+        if (servicio == null )
+        {
+            toastService.ShowWarning("No se ha podido cambiar de servicio al funcionario seleccionado");
+            return;
+        }
+        await CambiarDeServicio.InvokeAsync(servicio);
+    }
+
+    private async Task BuscarServicios()
+    {
+        servicios = serviceEscalafon.EscalafonModel.ServiciosDTO.Where(w => w.NombreDescriptivo.Contains(busqueda.ToUpper())).ToList();
+    }
+
+    private async void CerrarModalActual()
+    {
+        await CerrarModal.InvokeAsync();
+    }
+
+}
+
+

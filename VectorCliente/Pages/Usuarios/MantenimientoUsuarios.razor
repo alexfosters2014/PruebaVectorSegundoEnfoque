@@ -1,0 +1,41 @@
+﻿@page "/Usuarios"
+@inject ILocalStorageService localStorage
+@inject NavigationManager nav
+@inject IJSRuntime js
+@inject IServiceUsuario serviceUsuario
+
+<h3>Mantenimiento Usuarios</h3>
+@if (todos != null)
+{
+    <PantallaUsuario usuarios="@todos.usuariosDTO" usuarioLoegueado="@usuarioLogueado" 
+                     roles="@todos.rolesDTO" mesaOperativas="@todos.mesasOpDTO" />
+}
+
+@code {
+    private UsuarioDTO usuarioLogueado;
+
+    private ModelUsuariosRolesMOP todos;
+
+    protected async override Task OnInitializedAsync()
+    {
+        await cargaInicial();
+    }
+    private async Task cargaInicial()
+    {
+        try
+        {
+            usuarioLogueado = await localStorage.GetItemAsync<UsuarioDTO>(SD.LocalUsuario);
+            if (usuarioLogueado == null)
+            {
+                nav.NavigateTo("/", true);
+                return;
+            }
+            todos = await serviceUsuario.ObtenerModelUsuarioRolesMOp(usuarioLogueado.Token);
+            int d = 0;
+        }
+        catch (Exception ex)
+        {
+            await js.MsgError(ex.Message);
+        }
+    }
+}

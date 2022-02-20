@@ -1,0 +1,62 @@
+﻿@inject ServiceEscalafon serviceEscalafon
+@inject IJSRuntime js
+@inject IToastService toastService
+
+<SfDialog Width="650px" Target="#target" IsModal="true" @bind-Visible="Visibilidad">
+    <DialogTemplates>
+        <Header> Seleccionar Funcionario Operativo </Header>
+        <Content>
+                <BusquedaFuncionario DevolverFuncionarioDTO="DevolverFuncionario"
+                                     Busqueda=""
+                                     FuncionariosDTO="new()"/>
+        </Content>
+    </DialogTemplates>
+    <DialogButtons>
+        <DialogButton Content="Cerrar" IsPrimary="true" OnClick="@CerrarModalActual" />
+    </DialogButtons>
+    @*<DialogEvents OnOpen="@DialogOpen" Closed="@DialogClose" OnOverlayModalClick="@OverlayClick"></DialogEvents>*@
+    <DialogAnimationSettings Effect="@DialogEffect.Fade"></DialogAnimationSettings>
+</SfDialog>
+<style>
+    #target {
+        max-height: 800px;
+        height: 100%;
+    }
+</style>
+@code {
+    [Parameter]
+    public bool Visibilidad { get; set; }
+
+    [Parameter]
+    public EventCallback<FuncionarioDTO> ObtenerFuncionarioDTO { get; set; }
+
+    [Parameter]
+    public EventCallback CerrarModal { get; set; }
+
+    private string busqueda;
+    private List<FuncionarioDTO> funcionariosDTO = new();
+
+    private async Task CerrarModalActual()
+    {
+        await CerrarModal.InvokeAsync();
+    }
+    private async Task BuscarFuncionario()
+    {
+        if (string.IsNullOrEmpty(busqueda))
+        {
+            toastService.ShowWarning("No puede estar vacio", "Advertencia");
+            return;
+        }
+        GeneralTransport buscar = new()
+            {
+                Data = busqueda,
+                Valor = serviceEscalafon.IdMesaOperativaEnPlanificacion
+            };
+        funcionariosDTO = await serviceEscalafon.BusquedaFuncionario(buscar);
+    }
+    private async Task DevolverFuncionario(FuncionarioDTO funcionarioDTO)
+    {
+        await ObtenerFuncionarioDTO.InvokeAsync(funcionarioDTO);
+    }
+
+}

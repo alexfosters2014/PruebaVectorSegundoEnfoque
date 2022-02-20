@@ -1,0 +1,109 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="AccesoDatos.AppDbContext" Collapsed="true">
+    <Position X="9" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AQAICIAAAAQgAAAAAAAAIQgAAgAgCAAIAABAAAAAAgA=</HashCode>
+      <FileName>AppDbContext.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AccesoDatos.Ausencia">
+    <Position X="3.75" Y="0.5" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAASAIEAAAQAAAAAAAAAQAAEBAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Ausencia.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AccesoDatos.Cliente" Collapsed="true">
+    <Position X="10.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AIACAAAAAAAAAAAAACAAAAAAAgAAAAAgAAAAAgAAAAI=</HashCode>
+      <FileName>Cliente.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AccesoDatos.Computo">
+    <Position X="3.75" Y="3.25" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAQAAA=</HashCode>
+      <FileName>Computo.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AccesoDatos.Funcionario">
+    <Position X="6.5" Y="0.5" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>kQgSQAQCICACACIEgGMBABAEABAAAAAAQAAAAghBAAA=</HashCode>
+      <FileName>Funcionario.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AccesoDatos.MesaOperativa" Collapsed="true">
+    <Position X="9" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAAAAAAAAAAgAABAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>MesaOperativa.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AccesoDatos.NombrePuesto" Collapsed="true">
+    <Position X="10.75" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAIAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>NombrePuesto.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AccesoDatos.OperativaDiaria" Collapsed="true">
+    <Position X="12.5" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ABESAoSAAIABBgEAFAIEAABEQBAAAAIAQAAABAJACAA=</HashCode>
+      <FileName>OperativaDiaria.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AccesoDatos.PlanificacionDiaria">
+    <Position X="0.5" Y="0.5" Width="3" />
+    <TypeIdentifier>
+      <HashCode>ABESAoSAAIABAgEAFAAEAABEQBAAAAIAQAAABAJACAA=</HashCode>
+      <FileName>PlanificacionDiaria.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AccesoDatos.RegistroHora" Collapsed="true">
+    <Position X="12.5" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ABESAoAAAAQAAwEAkAAAAABEAAAAgQIAAAABAAAAAAg=</HashCode>
+      <FileName>RegistroHora.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AccesoDatos.Rol" Collapsed="true">
+    <Position X="9" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAABAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAA=</HashCode>
+      <FileName>Rol.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AccesoDatos.Rubro" Collapsed="true">
+    <Position X="10.75" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAAAAAAAABAgAAAAAAAAAAAAAAAAAAAAEA=</HashCode>
+      <FileName>Rubro.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AccesoDatos.Servicio" Collapsed="true">
+    <Position X="12.5" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAKgAEAAAAAAAIEAiCAAAgAQAAAAAAgAAAAIAAQAQg=</HashCode>
+      <FileName>Servicio.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AccesoDatos.TipoContrato" Collapsed="true">
+    <Position X="12.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAQAAAAAAAAAAAAABAAAAAEAAIAAAAAAAAAQ=</HashCode>
+      <FileName>TipoContrato.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AccesoDatos.Usuario" Collapsed="true">
+    <Position X="10.75" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAACAAAAAAAAAAAAAAAAAAAgAiAIAAAAAAACA=</HashCode>
+      <FileName>Usuario.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

@@ -1,0 +1,166 @@
+﻿@inject NavigationManager nav
+@inject IJSRuntime js
+@inject IServiceServicio serviceServicio
+
+
+@if (servicioDTO != null)
+{
+
+    <section class="container">
+        <h3>Servicio</h3>
+        <EditForm Model="servicioDTO" OnValidSubmit="NuevoActualizarServicio">
+            <DataAnnotationsValidator />
+            <div class="form-group">
+                <label for="nomDescrServ">Nombre Descriptivo*</label>
+                <InputText @bind-Value="servicioDTO.NombreDescriptivo" id="nomDescrServ" class="form-control" />
+                <ValidationMessage For="@( () => servicioDTO.NombreDescriptivo)" />
+            </div>
+            <div class="form-group">
+                <label for="mopServ">Mesa Operativa*</label>
+                <select @bind="@mopId" id="mopServ" class="form-control">
+                    <option value="0" selected>Seleccionar una MOP</option>
+                    @foreach (var mop in mesasOp)
+                    {
+                        if (servicioDTO.DependeDe.Id == mop.Id)
+                        {
+                            <option value="@mop.Id" selected>@mop.Nombre (@mop.Descripcion)</option>
+                        }
+                        else
+                        {
+                            <option value="@mop.Id">@mop.Nombre (@mop.Descripcion)</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="ciudadServ">Ciudad</label>
+                <InputText @bind-Value="servicioDTO.Ciudad" id="ciudadServ" class="form-control" />
+                <ValidationMessage For="@( () => servicioDTO.Ciudad)" />
+            </div>
+            <div class="form-group">
+                <label for="depaServ">Departamento*</label>
+                <InputText @bind-Value="servicioDTO.Departamento" id="depaServ" class="form-control" />
+                <ValidationMessage For="@( () => servicioDTO.Departamento)" />
+            </div>
+            <div class="form-group">
+                <label for="direccionServ">Dirección*</label>
+                <InputText @bind-Value="servicioDTO.Direccion" id="direccionServ" class="form-control" />
+                <ValidationMessage For="@( () => servicioDTO.Direccion)" />
+            </div>
+            <div class="form-group">
+                <label for="nomCoordServ">Nombre de Coordinación</label>
+                <InputText @bind-Value="servicioDTO.NombreCoordinacion" id="nomCoordServ" class="form-control" />
+                <ValidationMessage For="@( () => servicioDTO.NombreCoordinacion)" />
+            </div>
+            <div class="form-group">
+                <label for="telCoordServ">Tel coordinación</label>
+                <InputText @bind-Value="servicioDTO.TelCoordinacion" id="telCoordServ" class="form-control" />
+                <ValidationMessage For="@( () => servicioDTO.TelCoordinacion)" />
+            </div>
+            <div class="form-group">
+                <label for="nombcoordContaServ">Nombre de Contacto del Servicio</label>
+                <InputText @bind-Value="servicioDTO.NombreContactoServicio" id="nombcoordContaServ" class="form-control" />
+                <ValidationMessage For="@( () => servicioDTO.NombreContactoServicio)" />
+            </div>
+            <div class="form-group">
+                <label for="telContServ">Teléfono de Contacto</label>
+                <InputText @bind-Value="servicioDTO.TelContactoServicio" id="telContServ" class="form-control" />
+                <ValidationMessage For="@( () => servicioDTO.TelContactoServicio)" />
+            </div>
+            <div class="d-flex justify-content-center">
+                <button type="submit" class="btn btn-primary mr-1">@tituloBoton</button>
+                <button class="btn btn-primary ml-1" @onclick="Cancelar">Cancelar</button>
+            </div>
+        </EditForm>
+        <Divider Altura="50px" />
+    </section>
+
+}
+@code{
+    [Parameter]
+    public ServicioDTO servicioDTO { get; set;}
+
+    [Parameter]
+    public string tituloBoton { get; set; }
+
+    [Parameter]
+    public EventCallback<ServicioDTO> ActualizarEditarServicio { get; set; }
+
+    [Parameter]
+    public string token { get; set; }
+
+    [Parameter]
+    public List<MesaOperativaDTO> mesasOp { get; set; }
+
+    private int mopId;
+
+    protected override void OnInitialized()
+    {
+        mopId = servicioDTO.DependeDe.Id;
+    }
+
+    private async Task NuevoActualizarServicio()
+    {
+        if (servicioDTO.Id != 0)
+        {
+            await ActualizaServicio();
+        }
+        else
+        {
+            await NuevoServicio();
+        }
+    }
+
+    private async Task NuevoServicio()
+    {
+        try
+        {
+            if (mopId == 0)
+            {
+                await js.MsgAdvertencia("Debe seleccionar una mesa operativa");
+                return;
+            }
+            servicioDTO.DependeDe = mesasOp.Find(f => f.Id == mopId);
+            servicioDTO.Activo = true;
+            servicioDTO = await serviceServicio.Agregar(servicioDTO, token);
+            if (servicioDTO != null)
+            {
+                await js.MsgExitoso("Se ha agregado el servicio exitosamente");
+                await ActualizarEditarServicio.InvokeAsync(servicioDTO);
+            }
+        }
+        catch (Exception ex)
+        {
+            await js.MsgError(ex.Message);
+        }
+    }
+
+    private async Task ActualizaServicio()
+    {
+        try
+        {
+            if (mopId == 0)
+            {
+                await js.MsgError("Debe seleccionar una mesa operativa para el servicio");
+                return;
+            }
+            servicioDTO.DependeDe = mesasOp.Find(f => f.Id == mopId);
+            servicioDTO = await serviceServicio.Actualizar(servicioDTO, token);
+            if (servicioDTO != null)
+            {
+                await js.MsgExitoso("Se ha agregado el servicio exitosamente");
+                await ActualizarEditarServicio.InvokeAsync(servicioDTO);
+            }
+        }
+        catch (Exception ex)
+        {
+            await js.MsgError(ex.Message);
+        }
+    }
+
+    private void Cancelar()
+    {
+        ActualizarEditarServicio.InvokeAsync(null);
+    }
+
+}

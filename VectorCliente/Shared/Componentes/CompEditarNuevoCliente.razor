@@ -1,0 +1,116 @@
+﻿@inject NavigationManager nav
+@inject IJSRuntime js
+@inject IServiceCliente serviceCliente
+
+
+@if (clienteDTO != null)
+{
+
+    <section class="container">
+        <h3>Cliente</h3>
+        <EditForm Model="clienteDTO" OnValidSubmit="NuevoActualizarCliente">
+            <DataAnnotationsValidator />
+            <div class="form-group">
+                <label for="rutCICli">RUT/CI*</label>
+                <InputText @bind-Value="clienteDTO.RutCi" id="rutCICli" class="form-control" />
+                <ValidationMessage For="@( () => clienteDTO.RutCi)" />
+            </div>
+            <div class="form-group">
+                <label for="rSocialCli">Razón Social*</label>
+                <InputText @bind-Value="clienteDTO.RazonSocial" id="rSocialCli" class="form-control" />
+                <ValidationMessage For="@( () => clienteDTO.RazonSocial)" />
+            </div>
+            <div class="form-group">
+                <label for="nFantasiCli">Nombre Fantasia*</label>
+                <InputText @bind-Value="clienteDTO.NombreFantasia" id="nFantasiCli" class="form-control" />
+                <ValidationMessage For="@( () => clienteDTO.NombreFantasia)" />
+            </div>
+            <div class="form-group">
+                <label for="direccionCli">Dirección</label>
+                <InputText @bind-Value="clienteDTO.Direccion" id="direccionCli" class="form-control" />
+                <ValidationMessage For="@( () => clienteDTO.Direccion)" />
+            </div>
+            <div class="form-group">
+                <label for="telefonoCli">Teléfono</label>
+                <InputText @bind-Value="clienteDTO.Telefono" id="telefonoCli" class="form-control" />
+                <ValidationMessage For="@( () => clienteDTO.Telefono)" />
+            </div>
+            <div class="form-group">
+                <label for="obsCli">Observaciones</label>
+                <InputText @bind-Value="clienteDTO.Observacion" id="obsCli" class="form-control" />
+                <ValidationMessage For="@( () => clienteDTO.Observacion)" />
+            </div>
+            <div class="d-flex justify-content-center">
+                <button type="submit" class="btn btn-primary mr-1">@tituloBoton</button>
+                <button class="btn btn-primary ml-1" @onclick="Cancelar">Cancelar</button>
+            </div>
+        </EditForm>
+    </section>
+
+}
+@code{
+    [Parameter]
+    public ClienteDTO clienteDTO { get; set; }
+
+    [Parameter]
+    public string tituloBoton { get; set; }
+
+    [Parameter]
+    public EventCallback<ClienteDTO> ActualizarEditarCliente { get; set; }
+
+    [Parameter]
+    public string token { get; set; }
+
+    private async Task NuevoActualizarCliente()
+    {
+        if (clienteDTO.Id != 0)
+        {
+            await ActualizaCliente();
+        }
+        else
+        {
+            await NuevoCliente();
+        }
+    }
+
+    private async Task NuevoCliente()
+    {
+        try
+        {
+            clienteDTO.Activo = true;
+            clienteDTO = await serviceCliente.Agregar(clienteDTO,token);
+            if (clienteDTO != null)
+            {
+                await js.MsgExitoso("Se ha agregado el cliente exitosamente");
+                await ActualizarEditarCliente.InvokeAsync(clienteDTO);
+            }
+        }
+        catch (Exception ex)
+        {
+            await js.MsgError(ex.Message);
+        }
+    }
+
+    private async Task ActualizaCliente()
+    {
+        try
+        {
+            clienteDTO = await serviceCliente.Actualizar(clienteDTO, token);
+            if (clienteDTO != null)
+            {
+                await js.MsgExitoso("Se ha actualizado el cliente exitosamente");
+                await ActualizarEditarCliente.InvokeAsync(clienteDTO);
+            }
+        }
+        catch (Exception ex)
+        {
+            await js.MsgError(ex.Message);
+        }
+    }
+
+    private void Cancelar()
+    {
+        ActualizarEditarCliente.InvokeAsync(null);
+    }
+
+}

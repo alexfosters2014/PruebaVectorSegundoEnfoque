@@ -1,0 +1,338 @@
+﻿@page "/ClientesServicios"
+@inject ILocalStorageService localStorage
+@inject NavigationManager nav
+@inject IJSRuntime js
+@inject IServiceCliente serviceCliente
+@inject IServiceServicio serviceServicio
+@inject IServiceMesaOperativa serviceMOP
+
+
+<section class="row">
+    <div class="scrolVertical col-6 pr-2" style="height:90vh">
+        @if (clienteSwitch == SD.EditEnum.LISTA.ToString())
+        {
+            <article>
+                <h6 style="padding:15px">Clientes</h6>
+
+
+                <table class="table">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th scope="col">RUT/CI</th>
+                            <th scope="col">Razón</th>
+                            <th scope="col">Nombre Fantasia</th>
+                            <th scope="col"></th>
+                            <th scope="col"></th>
+                            <th scope="col"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (clientes != null && clientes.Any())
+                        {
+                            @foreach (var cli in clientes)
+                            {
+                                <tr>
+                                    <td>@cli.RutCi</td>
+                                    <td>@cli.RazonSocial</td>
+                                    <td>@cli.NombreFantasia</td>
+                                    <td><a href="" @onclick="(() => VerServicios(cli.Id))" @onclick:preventDefault><IconEdit Icon="ver" Titulo="Ver Servicio" /></a></td>
+                                    <td><a href="" @onclick="(() => EditarCliente(cli.Id))" @onclick:preventDefault><IconEdit Icon="editar" Titulo="Editar cliente" /></a></td>
+                                    <td><a href="" @onclick="(() => BajaCliente(cli.Id))" @onclick:preventDefault><IconEdit Icon="delete" Titulo="Baja Cliente" /></a></td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+                @if (clientes != null && clientes.Count == 0)
+                {
+                    <h5 style="color:orangered">No hay clientes registrados</h5>
+                }
+                <Divider Altura="30px" />
+                <div class="d-flex justify-content-center">
+                    <a href="" @onclick="NuevoCliente" @onclick:preventDefault><IconEdit Icon="add" Titulo="Agregar"/></a>
+                </div>
+            </article>
+            <Divider Altura="60px" />
+        }
+        else if (clienteSwitch == SD.EditEnum.NUEVO.ToString())
+        {
+            <article>
+                <CompEditarNuevoCliente ActualizarEditarCliente="NuevoActualizarCliente"
+                                        clienteDTO="clienteSeleccionado"
+                                        tituloBoton="Agregar"
+                                        token="@usuarioDTO.Token" />
+            </article>
+        }
+        else if (clienteSwitch == SD.EditEnum.EDICION.ToString())
+        {
+
+
+            <article>
+                <CompEditarNuevoCliente ActualizarEditarCliente="NuevoActualizarCliente"
+                                        clienteDTO="clienteSeleccionado"
+                                        tituloBoton="Actualizar"
+                                        token="@usuarioDTO.Token" />
+            </article>
+        }
+    </div>
+
+    <div class="scrolVertical col-6 pl-2" style="height:90vh">
+        @if (servicioSwitch == SD.EditEnum.LISTA.ToString())
+        {
+            <article>
+                @if (clienteSeleccionado != null)
+                {
+                    <h6 style="padding:15px">Servicios del cliente: @clienteSeleccionado.NombreFantasia</h6>
+                }
+                else
+                {
+                    <h6 style="padding:15px">Servicios</h6>
+                }
+
+                <table class="table">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th scope="col">Servicio</th>
+                            <th scope="col">Ciudad</th>
+                            <th scope="col">Dependencia</th>
+                            <th scope="col"></th>
+                            <th scope="col"></th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @if (servicios != null && servicios.Any())
+                        {
+                            @foreach (var serv in servicios)
+                            {
+                                <tr>
+                                    <td>@serv.NombreDescriptivo</td>
+                                    <td>@serv.Ciudad</td>
+                                    <td>@serv.DependeDe.Nombre (@serv.DependeDe.Descripcion)</td>
+                                    <td><a href="" @onclick="(() => EditarServicio(serv.Id))" @onclick:preventDefault><IconEdit Icon="editar" Titulo="Editar cliente" /></a></td>
+                                    <td><a href="" @onclick="(() => BajaServicio(serv.Id))" @onclick:preventDefault><IconEdit Icon="delete" Titulo="Baja Cliente" /></a></td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+
+                </table>
+
+                @if (servicios != null && servicios.Count == 0)
+                {
+                    <h5 style="color:orangered">El cliente seleccionado no tienes servicios registrados aun</h5>
+                }
+                <Divider Altura="30px" />
+                @if (habilitacionNuevoServicio)
+                {
+                    <div class="d-flex justify-content-center">
+                        <a href="" @onclick="NuevoServicio" @onclick:preventDefault><IconEdit Icon="add" Titulo="Agregar" /></a>
+                    </div>
+                }
+                <Divider Altura="50px" />
+            </article>
+        }
+        else if (servicioSwitch == SD.EditEnum.NUEVO.ToString())
+        {
+            <article>
+                <CompEditarNuevoServicio ActualizarEditarServicio="NuevoActualizarServicio"
+                                         servicioDTO="servicioSeleccionado"
+                                         tituloBoton="Agregar"
+                                         token="@usuarioDTO.Token"
+                                         mesasOp="mop" />
+            </article>
+        }
+        else if (servicioSwitch == SD.EditEnum.EDICION.ToString())
+        {
+            <article>
+                <CompEditarNuevoServicio ActualizarEditarServicio="NuevoActualizarServicio"
+                                         servicioDTO="servicioSeleccionado"
+                                         tituloBoton="Actualizar"
+                                         token="@usuarioDTO.Token"
+                                         mesasOp="mop" />
+            </article>
+        }
+        </div>
+</section>
+
+@code{
+    private List<ClienteDTO> clientes;
+    private List<ServicioDTO> servicios = null;
+    private ClienteDTO clienteSeleccionado = null;
+    private ServicioDTO servicioSeleccionado = null;
+    private List<MesaOperativaDTO> mop;
+    private UsuarioDTO usuarioDTO;
+    private bool habilitacionNuevoServicio = false;
+
+    private string clienteSwitch = SD.EditEnum.LISTA.ToString();
+    private string servicioSwitch = SD.EditEnum.LISTA.ToString();
+
+    protected async override Task OnInitializedAsync()
+    {
+        try
+        {
+            usuarioDTO = await localStorage.GetItemAsync<UsuarioDTO>(SD.LocalUsuario);
+            clientes = await serviceCliente.ObtenerTodos(usuarioDTO.Token);
+            mop = await serviceMOP.ObtenerTodos(usuarioDTO.Token);
+        }
+        catch (Exception ex)
+        {
+            await js.MsgError(ex.Message);
+        }
+    }
+
+    private async Task VerServicios(int clienteId)
+    {
+        try
+        {
+            clienteSeleccionado = clientes.Find(f => f.Id == clienteId);
+            servicios = await serviceServicio.ObtenerPorCliente(clienteId, usuarioDTO.Token);
+            habilitacionNuevoServicio = true;
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            await js.MsgError(ex.Message);
+        }
+    }
+    private async void EditarCliente(int id)
+    {
+        clienteSeleccionado = clientes.Find(f => f.Id == id);
+        if (clienteSeleccionado != null)
+        {
+            clienteSwitch = SD.EditEnum.EDICION.ToString();
+        }
+        else
+        {
+            await js.MsgAdvertencia("No se pudo encontrar el cliente seleccionado");
+        }
+    }
+    private async Task BajaCliente(int clienteId)
+    {
+        try
+        {
+            bool confirmacion = await js.MsgConfirmacion("Desea eliminar el cliente seleccionado?");
+            if (confirmacion)
+            {
+                bool bajaServicios = await serviceServicio.BajaServiciosPorCliente(clienteId, usuarioDTO.Token);
+                if (bajaServicios)
+                {
+                    bool bajaCliente = await serviceCliente.Baja(clienteId, usuarioDTO.Token);
+                    if (bajaCliente)
+                    {
+                        clienteSeleccionado = clientes.Find(f => f.Id == clienteId);
+                        clientes.Remove(clienteSeleccionado);
+                        clienteSeleccionado = new ClienteDTO();
+                        await js.MsgExitoso("Se ha dado de baja el cliente exitosamente");
+                        StateHasChanged();
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            await js.MsgError(ex.Message);
+        }
+    }
+    private async void NuevoCliente()
+    {
+        habilitacionNuevoServicio = false;
+        clienteSeleccionado = new ClienteDTO();
+        if (clienteSeleccionado != null)
+        {
+            clienteSwitch = SD.EditEnum.NUEVO.ToString();
+        }
+        else
+        {
+            await js.MsgAdvertencia("No se pudo encontrar el cliente seleccionado");
+        }
+    }
+    private async Task EditarServicio(int id)
+    {
+        servicioSeleccionado = servicios.Find(f => f.Id == id);
+        if (servicioSeleccionado != null)
+        {
+            servicioSwitch = SD.EditEnum.EDICION.ToString();
+        }
+        else
+        {
+            await js.MsgAdvertencia("No se pudo encontrar el servicio seleccionado");
+        }
+    }
+
+    private async Task BajaServicio(int servicioId)
+    {
+        try
+        {
+            bool confirmacion = await js.MsgConfirmacion("Desea eliminar el cliente seleccionado?");
+            if (confirmacion) {
+                bool bajaServicio = await serviceServicio.Baja(servicioId, usuarioDTO.Token);
+                if (bajaServicio)
+                {
+                    servicioSeleccionado = servicios.Find(f => f.Id == servicioId);
+                    servicios.Remove(servicioSeleccionado);
+                    servicioSeleccionado = new ServicioDTO();
+                    await js.MsgExitoso("Se ha dado de baja el servicio exitosamente");
+                    StateHasChanged();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            await js.MsgError(ex.Message);
+        }
+    }
+
+    private async Task NuevoServicio()
+    {
+        servicioSeleccionado = new ServicioDTO();
+        servicioSeleccionado.Cliente = clienteSeleccionado;
+        servicioSeleccionado.DependeDe = new MesaOperativaDTO();
+
+        if (servicioSeleccionado != null)
+        {
+            servicioSwitch = SD.EditEnum.NUEVO.ToString();
+        }
+        else
+        {
+            await js.MsgAdvertencia("No se pudo encontrar el cliente seleccionado");
+        }
+    }
+
+    private void NuevoActualizarCliente(ClienteDTO clienteDTO)
+    {
+        if (clienteDTO != null)
+        {
+            ClienteDTO clienteAux = clientes.Find(f => f.Id == clienteDTO.Id);
+            if (clienteAux != null)
+            {
+                clienteAux = clienteDTO;
+            }
+            else
+            {
+                clientes.Add(clienteDTO);
+            }
+            StateHasChanged();
+        }
+        clienteSwitch = SD.EditEnum.LISTA.ToString();
+    }
+
+    private void NuevoActualizarServicio(ServicioDTO servicioDTO)
+    {
+        if (servicioDTO != null)
+        {
+            ServicioDTO servicioAux = servicios.Find(f => f.Id == servicioDTO.Id);
+            if (servicioAux != null)
+            {
+                servicioAux = servicioDTO;
+            }
+            else
+            {
+                servicios.Add(servicioDTO);
+            }
+            StateHasChanged();
+        }
+        servicioSwitch = SD.EditEnum.LISTA.ToString();
+    }
+
+}

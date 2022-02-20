@@ -1,0 +1,176 @@
+﻿@page "/Planificacion/Index"
+@using System.Globalization;
+@inject ILocalStorageService localStorage
+@inject ServiceEscalafon serviceEscalafon
+@inject NavigationManager nav
+@inject IJSRuntime js
+
+    <section class="container">
+        @if (visible)
+        {
+            <h3>Escalafón Operativo</h3>
+            <div class="row justify-content-center align-items-center">
+                <button class="botonCuadradoGrande" @onclick="Nuevo">Escalafón operativo en blanco</button>
+                <button class="botonCuadradoGrande" @onclick="Importar">Copiar Escalafón</button>
+            </div>
+        }
+        else
+        {
+            if (nuevo)
+            {
+                <div class="row justify-content-center align-items-center recuadroPlanificacion">
+                    <div class="col-5">
+                        <h3>Planificación del Escalafón Nuevo/Abrir</h3>
+                        <Divider Altura="10px" />
+                        <div class="form-group">
+                            <label style="color:darkblue">@FechaFormateada()</label>
+                            <input type="date" @bind="fechaNuevaAbrir" class="form-control" />
+                        </div>
+                        <button class="btn btn-primary" @onclick="NuevaPlanificacion">Aceptar</button>
+                        <button class="btn btn-primary" @onclick="Cancelar">Cancelar</button>
+                    </div>
+                </div>
+
+            }
+            else
+            {
+                <div class="row justify-content-center align-items-center recuadroPlanificacion">
+                    <div class="col-5">
+                        <h3>Copia de Planificación de Escalafón</h3>.
+                        <Divider Altura="10px" />
+                        <div class="form-group">
+                            <label for="rut">Fecha a copiar</label>
+                            <input type="date" @bind="fechaSeleccionadaParaCopiar" id="rut" class="form-control" />
+                        </div>
+                        <div class="form-group">
+                            <label>Nueva fecha</label>
+                            <input type="date" @bind="nuevaFechaCopiar" class="form-control" />
+                        </div>
+                        <button class="btn btn-primary" @onclick="CopiarPlanificacion">Copiar</button>
+                        <button class="btn btn-primary" @onclick="Cancelar">Cancelar</button>
+                    </div>
+                </div>
+            }
+        }
+    </section>
+    <Loading Visibilidad="loadingVisible" />
+@code {
+    private bool loadingVisible = false;
+    private bool visible = true;
+    private bool nuevo;
+
+    private DateTime fechaNuevaAbrir;
+    private DateTime fechaSeleccionadaParaCopiar;
+    private DateTime nuevaFechaCopiar;
+
+    private UsuarioDTO usuario;
+    ElementReference refEscalafon;
+
+    protected async override Task OnInitializedAsync()
+    {
+        fechaNuevaAbrir = DateTime.Today;
+        fechaSeleccionadaParaCopiar = DateTime.Today;
+        nuevaFechaCopiar = DateTime.Today;
+        usuario = await localStorage.GetItemAsync<UsuarioDTO>(SD.LocalUsuario);
+        if (usuario == null)
+        {
+            nav.NavigateTo("/", true);
+        }
+    }
+
+    private void Nuevo()
+    {
+        visible = false;
+        nuevo = true;
+    }
+
+    private void Importar()
+    {
+        visible = false;
+        nuevo = false;
+    }
+    private string FechaFormateada () => fechaNuevaAbrir.ToString("dddd", new CultureInfo("es-ES")).ToUpper();
+
+    private async Task NuevaPlanificacion()
+    {
+        try
+        {
+            loadingVisible = true;
+            //service para corroborar que la fecha no existe
+            GeneralTransport modelo = new()
+                {
+                    Fecha = fechaNuevaAbrir,
+                    Valor = usuario.MesaOperativa.Id
+                };
+            await serviceEscalafon.Inicializar(modelo, usuario, false);
+            bool existe = await serviceEscalafon.ExisteFechaEscalafon(modelo);
+            if (!existe)
+            {
+                await serviceEscalafon.CrearNuevo(modelo);
+                await js.MsgExitoso("Escalafon creado con éxito");
+                await localStorage.SetItemAsync(SD.FechaPlanificacionGantt, fechaNuevaAbrir.Date);
+                loadingVisible = false;
+                }
+                else
+                {
+                    await serviceEscalafon.AbrirEscalafon(modelo);
+                    await localStorage.SetItemAsync(SD.FechaPlanificacionGantt, fechaNuevaAbrir.Date);
+                }
+                loadingVisible = false;
+                nav.NavigateTo($"/Planificacion/Escalafon");
+            }
+            catch (Exception ex)
+            {
+                await js.MsgAdvertencia(ex.Message);
+                loadingVisible = false;
+            }
+        }
+
+        private async Task CopiarPlanificacion()
+        {
+            loadingVisible = true;
+            if (fechaSeleccionadaParaCopiar > nuevaFechaCopiar)
+            {
+                await js.MsgAdvertencia("La fecha a copiar tiene que ser anterior a la nueva fecha");
+            }
+            //leer archivo si existe y si existe guardarlo en sessionStorage nombre SD.SessionEscalafon
+            GeneralTransport modelo = new()
+            {
+                Fecha = fechaSeleccionadaParaCopiar,
+                FechaFin = nuevaFechaCopiar,
+                Valor = usuario.MesaOperativa.Id
+            };
+
+            await serviceEscalafon.Inicializar(modelo, usuario, true);
+            bool existeFechaAnterior = await serviceEscalafon.ExisteFechaEscalafon(modelo);
+            bool existeFechaNueva = await serviceEscalafon.ExisteFechaEscalafon(new GeneralTransport()
+            {
+                Fecha = modelo.FechaFin,
+                Valor = modelo.Valor
+            });
+
+            if (existeFechaAnterior && !existeFechaNueva)
+            {
+                await serviceEscalafon.CopiaEscalafon(modelo);
+                await localStorage.SetItemAsync(SD.FechaPlanificacionGantt, nuevaFechaCopiar.Date);
+                await js.MsgExitoso("Escalafon copiado con éxito");
+                loadingVisible = false;
+            }
+            else
+            {
+                await js.MsgAdvertencia("Para que pueda crear una copia de escalafon , debe existir una planificación en la fecha" +
+                    " anterior especificada, y la nueva fecha no debe haber sido creada. Revise");
+            }
+            loadingVisible = false;
+            nav.NavigateTo($"/Planificacion/Escalafon");
+        }
+
+        private void Cancelar()
+        {
+            visible = true;
+        }
+        private async Task CargarEscalafon()
+        {
+
+        }
+    }

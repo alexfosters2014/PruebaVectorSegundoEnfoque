@@ -1,0 +1,221 @@
+﻿@page "/Planificacion/Escalafon"
+@using Syncfusion.Blazor.Navigations
+@inject ILocalStorageService localStorage
+@inject ISessionStorageService sessionStorage
+@inject NavigationManager nav
+@inject IJSRuntime js
+@inject ServiceEscalafon serviceEscalafon
+@inject IServicePrefFunServicio servicePrefFunServicio
+@inject HubConnection hubConnection
+
+<PreferenciaFuncionariosServicio CerrarModal="CerrarModal"
+                                 PrefServicioFuncionarioDTO="preferenciasFuncEnServicio"
+                                 ServicioDTO="ServicioPref"
+                                 Visibilidad="VisibilidadPrefFunServ" />
+
+<SfTab CssClass="tab_content e-fill" 
+       EnablePersistence="true" @bind-SelectedItem="tabSeleccionado">
+    <TabEvents Selecting="Select"> 
+    </TabEvents>
+    <TabItems>
+        <TabItem>
+            <ChildContent>
+                <TabHeader Text="Planificación"></TabHeader>
+            </ChildContent>
+
+            <ContentTemplate>
+                
+                <div class="d-flex justify-content-between">
+                    <h6>Escalafon @(TituloFecha())</h6>
+                    <div class="d-flex justify-content-center">
+                        <button class="btn btn-primary ml-1 mr-1">Enviar a Operativa</button>
+                        <a href="/GanttAusencias" class="btn btn-primary ml-1 mr-1" target="_blank">Visor Ausencias</a>
+                    </div>
+                    <button type="button" class="btn btn-link" @onclick="Cerrar">Cerrar</button>
+                </div>
+                <Divider Altura="5px" />
+
+                @if (serviceEscalafon.EscalafonModel != null)
+                {
+                    <section class="d-flex">
+                        @if (serviceEscalafon.EscalafonModel.ClientesDTO != null)
+                        {
+
+                            @*<select @bind="clienteSeleccionado" class="btn btn-outline-secondary dropdown-toggle" id="inputGroupSelect04">*@
+                            <select @bind="serviceEscalafon.filtroEscalafon.FiltroIdCliente" class="custom-select mr-2" id="inputGroupSelect04">
+                                <option value="0" selected>Todos los clientes</option>
+                                @foreach (var cliente in serviceEscalafon.EscalafonModel.ClientesDTO)
+                                {
+                                    @if (cliente.Id != serviceEscalafon.filtroEscalafon.FiltroIdCliente)
+                                    {
+                                        <option value="@cliente.Id">@cliente.RazonSocial (@cliente.NombreFantasia)</option>  
+                                    }
+                                    else
+                                    {
+                                       <option value="@cliente.Id" selected>@cliente.RazonSocial (@cliente.NombreFantasia)</option>  
+                                    }
+                                   
+                                }
+                            </select>
+                        }
+                        <div class="input-group ml-2 mr-2">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="inputGroup-sizing-default">Servicio</span>
+                            </div>
+                            <input type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default"
+                                   @bind="serviceEscalafon.filtroEscalafon.FiltroNombreServicio">
+                        </div>
+
+                        <button class="btn btn-primary ml-2 mb-0 mt-0" @onclick="FiltrarServicios">Filtrar</button>
+                    </section>
+
+                    <Divider Altura="5px" />
+                    <article class="scrolVertical text-center align-items-center" style="height:78vh">
+                        @if (serviceEscalafon.EscalafonServiciosFiltro != null)
+                        {
+                            foreach (var serviciosData in serviceEscalafon.EscalafonServiciosFiltro)
+                            {
+                                 @*<Virtualize Items="serviceEscalafon.EscalafonServiciosFiltro" Context="serviciosData">*@
+                                    
+                                <ServicioContenedor Servicio = "serviciosData.ServicioDTO" @key="serviciosData.ServicioDTO.Id"
+                                                    EstadosDiarios = "serviciosData.EstadosDTO" 
+                                                     VerPrefFuncionarioServicio="VerPrefFuncionarioServicio"/>
+                             
+                       @*  </Virtualize>*@
+                            }
+                        }
+                    </article>
+                }
+            </ContentTemplate>
+
+
+        </TabItem>
+
+        <TabItem> 
+            <ChildContent>
+                <TabHeader Text="Bolsa"></TabHeader>
+            </ChildContent>
+
+            <ContentTemplate>
+               <PlanificacionBolsa bolsaRotativos="serviceEscalafon.BolsaEstados"/>
+            </ContentTemplate>
+</TabItem>
+
+    </TabItems>
+</SfTab>
+
+@code {
+
+    private UsuarioDTO usuario;
+
+    private int clienteSeleccionado = 0;
+    private int servicioSeleccionado = 0;
+    private int tabSeleccionado = 0;
+    private ServicioDTO ServicioPref = new();
+
+    List<PreferenciaFuncionarioServicioDTO> preferenciasFuncEnServicio = new();
+    private bool VisibilidadPrefFunServ = false;
+
+    protected async override Task OnInitializedAsync()
+    {
+        usuario = await localStorage.GetItemAsync<UsuarioDTO>(SD.LocalUsuario);
+        if (usuario == null)
+        {
+            nav.NavigateTo("/", true);
+            return;
+        }
+        if (serviceEscalafon.EscalafonModel == null)
+        {
+            nav.NavigateTo("/Planificacion/Index");
+        }
+        serviceEscalafon.IdMesaOperativaEnPlanificacion = usuario.MesaOperativa.Id;
+
+
+        hubConnection.On<PlanificacionDiariaDTO>("RecibirEstado", async (estado) =>
+        {
+            if (estado.IdMesaOperativa == serviceEscalafon.IdMesaOperativaEnPlanificacion &&
+       estado.Fecha.Date == serviceEscalafon.FechaPlanificacion &&
+        !string.IsNullOrEmpty(estado.ModalidadActualizacionEscalafon))
+            {
+            //await serviceEscalafon.AgregarActualizarEliminarEscalafonFrontEnd(estado);
+
+            await serviceEscalafon.ABMEscalafonBolsaFrontEnd(estado);
+            // await FiltrarServicios();
+            StateHasChanged();
+
+            }
+        });    
+
+
+        hubConnection.On<PlanificacionDiariaDTO>("RecibirEstadoSoloBolsa", async (estado) =>
+     {
+         if (estado.Rotativo && estado.IdMesaOperativa == serviceEscalafon.IdMesaOperativaEnPlanificacion &&
+           estado.Fecha.Date == serviceEscalafon.FechaPlanificacion)
+         {
+             await serviceEscalafon.ABMBolsaFrontEnd(estado);
+             StateHasChanged();
+         }
+
+     });
+
+        hubConnection.On<PlanificacionDiariaDTO,ServicioDTO>("RecibirMoverDeServicio", async (estado, servicioAnterior) =>
+           {
+               if (estado.IdMesaOperativa == serviceEscalafon.IdMesaOperativaEnPlanificacion &&
+          estado.Fecha.Date == serviceEscalafon.FechaPlanificacion &&
+           !string.IsNullOrEmpty(estado.ModalidadActualizacionEscalafon))
+               {
+                   await serviceEscalafon.ABMEscalafonBolsaFrontEnd(estado);
+                   await serviceEscalafon.MoverAOtroServicioPlanDiarioFrontEnd(estado, servicioAnterior);
+                   StateHasChanged();
+            }
+        });  
+
+    }
+
+    private string TituloFecha() => ($"{SD.DiaDeSemana[(int)serviceEscalafon.FechaPlanificacion.DayOfWeek]}, {serviceEscalafon.FechaPlanificacion.ToString("dd/MM/yyyy")}");
+
+    private void Cerrar()
+    {
+        nav.NavigateTo("/Planificacion/Index",true);
+    }
+
+    private async Task FiltrarServicios()
+    {
+        await serviceEscalafon.FiltrarEscalafon();
+    }
+
+    private async Task Visor()
+    {
+        nav.NavigateTo("GanttAusencias");
+    }
+
+    public void Select(SelectingEventArgs args)
+    {
+        if(args.IsSwiped)
+        {
+            args.Cancel = true;
+        }
+    }
+
+    private async Task VerPrefFuncionarioServicio(ServicioDTO servicio)
+    {
+        ServicioPref = servicio;
+        preferenciasFuncEnServicio = await servicePrefFunServicio.Obtener(servicio.Id, serviceEscalafon.UsuarioDTO.Token);
+        VisibilidadPrefFunServ = true;
+    }
+
+    private async Task CerrarModal()
+    {
+        VisibilidadPrefFunServ = false;
+        preferenciasFuncEnServicio = new();
+    }
+    //public void OnTabSeleccionado(SelectEventArgs args) 
+    //{
+    //    if (tabSeleccionado == 1)
+    //    {
+    //        StateHasChanged();
+    //    }
+    //} 
+
+    }
+

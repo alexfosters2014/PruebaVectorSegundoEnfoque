@@ -1,0 +1,410 @@
+﻿@inject ServiceEscalafon serviceEscalafon
+@inject IJSRuntime js
+@inject ISessionStorageService sessionStorage 
+@inject IToastService toastService;
+
+
+<ModalFuncionarioOperativo Visibilidad="@visibilidadFunOperativoCL" ObtenerFuncionarioDTO="SeleccionarTipoFuncionarioCL" />
+<ModalNombrePuesto Visibilidad="visibilidadNombrePuesto" servicioDTO="@servicioDTO" ObtenerNombrePuestoDTO="ObtenerNombrePuesto" />
+<ModalAusencia CerrarModal="CerrarModal" AsignarFechasAusencia="AsignarFechasAusencia" Visibilidad="visibilidadFechasInicioFin" />
+<ModalTipoFuncionario Visibilidad="visibilidadTipo" SeleccionarTipo="SeleccionarTipo" CerrarModal="CerrarModal" />
+<ModalPropiedadesEstado AgregarPropiedadesExtendidas="ModificarOpcionesExt" Visibilidad="visibilidadOpciones" opcionesExtendidas="opcionesExtendidas"/>
+
+
+@if (PlanDiarioDTO != null)
+{
+    @if (Estado == SD.EditEnum.LISTA.ToString())
+    {
+             <table class="table text-xsmall celdaNoDependienteTexto @CssParaSegundoNivel() tamanioFuenteEstado" id="contextmenutarget">
+            <tr @ondblclick="Edicion">
+                <td title="Tipo Funcionario : @PlanDiarioDTO.TipoFuncionarioOperativo" style="width:2.5%">
+                    <img src="iconosPuesto/@ImagenTipoFunOperativo(PlanDiarioDTO.TipoFuncionarioOperativo)" class="imgEstado" />
+                </td>
+                <td title="Comienzo de jornada" style="width:2%">
+                    <img src="iconosPuesto/iconEstados/@ImagenComienzoJornada()" class="imgEstadoIndicador" />
+                </td>
+                <td title="Estado Funcionario Operativo" style="width:7%">
+                    <div style="padding:1px 3px;border-radius:3px;background-color:@(ColorEstado(PlanDiarioDTO.Computo.NombreDescriptivo))">
+                        @PlanDiarioDTO.Computo.NombreDescriptivo
+                    </div>
+                </td>
+                <td title="Nro. Funcionario Operativo" style="width:4%" align="center">@PlanDiarioDTO.FuncionarioOperativo.Numero</td>
+                <td title="Nombre Funcionario Operativo: @PlanDiarioDTO.FuncionarioOperativo.ToString()" style="width:12%" align="left">
+                    <ImgRotativo TipoResumido="@PlanDiarioDTO.TipoResumido"/>
+                    @PlanDiarioDTO.FuncionarioOperativo.NombreCorto()
+                </td>
+                <td title="Teléfono Funcionario Operativo - Direccion: @PlanDiarioDTO.FuncionarioOperativo.Direccion" 
+                style="width:8%" align="center">@PlanDiarioDTO.FuncionarioOperativo.Celular</td>
+
+                <td title="Hora Entrada" style="width:4%" align="center">@PlanDiarioDTO.HoraEntrada.ToString("HH:mm")
+                   <HorarioDiaSiguiente Horario="@PlanDiarioDTO.HoraEntrada" />
+                </td>
+                <td title="Hora Salida" style="width:4%" align="center">@PlanDiarioDTO.HoraSalida.ToString("HH:mm")
+                    <HorarioDiaSiguiente Horario="@PlanDiarioDTO.HoraSalida" />
+                </td>
+                @if (!PlanDiarioDTO.SegundoNivel)
+                {
+                    <td title="Referencia Funcionario de Segundo Nivel" style="width:12%"> @PlanDiarioDTO.FuncionarioSegundoNivel
+                        @if (PlanDiarioDTO.FuncionarioSegundoNivel.Length > 5 && !PlanDiarioDTO.TengoSegundoNivelActivo)
+                        {
+                         <a href="" @onclick="AgregarSegundoNivel" @onclick:preventDefault>
+                                <img src="iconosPuesto/iconEstados/flechaabajo.png" class="imgEstadoBanderaSegundoNivel" />
+                         </a>
+                        }
+                    </td>
+                }
+                else
+                {
+                     <td title="" style="width:12%">---</td>
+                }
+                <td title="Observaciones : @PlanDiarioDTO.Observaciones" style="width:15%" align="left">@RecorteObservaciones(PlanDiarioDTO.Observaciones)</td>
+                <td title="Horas totales" style="width:3%" align="center">@PlanDiarioDTO.CantidadHorasTotales</td>
+                <td title="Horas extras" style="width:3%" align="center">@PlanDiarioDTO.CantidadHorasExtras</td>
+                <td title="Puesto: @PlanDiarioDTO.NombrePuesto" style="width:9%">@PlanDiarioDTO.NombrePuestoCorto()</td>
+                <td title="Facturable?">
+                    <img src="iconosPuesto/iconEstados/@FacturableIcono(PlanDiarioDTO.Facturable)" class="imgEstado" />
+                    @if (PlanDiarioDTO.HoySegundoLibre)
+                    {
+                        <img src="iconosPuesto/iconEstados/indicadordoLibreHoy.png" class="imgEstado" />
+                    }    
+                </td>
+                @if (!SD.EstadosComputosModal[PlanDiarioDTO.Computo.NombreDescriptivo])
+                {
+                    <td>
+                       <FAB Opcion="ElegirOpcion"/>
+                    </td>
+                }
+                else
+                {
+                    <td>
+                        <button class="btn btn-outline-secondary pt-0 pb-0" disabled>Editar</button>
+                    </td>
+                    <td>
+                        <a href="" class="btn-disabled" @onclick:preventDefault disabled="disabled">
+                            <img src="icons/deleteDisabled.png" class="imgEstado" />
+                        </a>
+                    </td>
+                }
+            </tr>
+        </table>
+    }
+
+    @if (Estado == SD.EditEnum.EDICION.ToString())
+    {
+        <ModalTipoFuncionario Visibilidad="false" />
+
+        <table class="table w-auto text-xsmall @CssParaSegundoNivel()"
+               style="background:linear-gradient(0deg, rgba(210,210,210,1) 0%, rgba(190,190,190,1) 100%)">
+            <tr>
+                <th>Tipo</th>
+                <th width="150px">Estado</th>
+                <th>Nro.</th>
+                <th>Funcionario</th>
+                <th>Celular</th>
+                <th>Entrada</th>
+                <th>Salida</th>
+                <th>Ref 2do Nivel</th>
+                <th>Observaciones</th>
+                <th>Puesto</th>
+                <th>Facturable</th>
+
+            </tr>
+            <tr>
+                <td style="vertical-align:middle">
+                    <a href="" @onclick="CambiarTipoFuncionario" @onclick:preventDefault>
+                        <img src="iconosPuesto/@ImagenTipoFunOperativo(PlanDiarioDTO.TipoFuncionarioOperativo)" class="imgEstado" />
+                    </a>
+                </td>
+                <td style="vertical-align:middle">
+                    <select class="form-select colorDark" @onchange="SeleccionEstado">
+                        @foreach (var estado in serviceEscalafon.EscalafonModel.ComputosDTO)
+                        {
+                            if (PlanDiarioDTO.Computo.Id == estado.Id)
+                            {
+                                <option value="@estado.Id" selected>@estado.NombreDescriptivo</option>
+                            }
+                            else
+                            {
+                                <option value="@estado.Id">@estado.NombreDescriptivo</option>
+                            }
+                        }
+                    </select>
+                </td>
+                <td style="vertical-align:middle">@PlanDiarioDTO.FuncionarioOperativo.Numero</td>
+                <td style="vertical-align:middle">@PlanDiarioDTO.FuncionarioOperativo.ToString()</td>
+                <td style="vertical-align:middle"><input @bind="PlanDiarioDTO.FuncionarioOperativo.Celular" class="form-control colorDark" /></td>
+                <td style="vertical-align:middle"><input type="time" @bind="PlanDiarioDTO.HoraEntrada" class="form-control colorDark" /></td>
+                <td style="vertical-align:middle"><input type="time" @bind="PlanDiarioDTO.HoraSalida" class="form-control colorDark" /></td>
+                @if (!PlanDiarioDTO.SegundoNivel)
+                {
+                    <td style="vertical-align:middle"> @PlanDiarioDTO.FuncionarioSegundoNivel
+                        <a href="" @onclick="CambiarFuncionarioCubreLibre" @onclick:preventDefault>
+                        <img src="iconosPuesto/Otros/lupa.png" class="imgEstado" />
+                    </a>
+                    </td>
+                }
+                 else
+                    {
+                         <td style="vertical-align:middle"></td>
+                    }
+                    <td style="vertical-align:middle"><input @bind="PlanDiarioDTO.Observaciones" class="form-control colorDark" /></td>
+                <td style="vertical-align:middle">
+                    @PlanDiarioDTO.NombrePuesto
+                    <a href="" @onclick="CambiarNombrePuesto" @onclick:preventDefault>
+                        <img src="iconosPuesto/Otros/lupa.png" class="imgEstado" />
+                    </a>
+                </td>
+                <td style="vertical-align:middle">
+                    <select class="form-select colorDark" @bind="PlanDiarioDTO.Turno">
+                        @foreach (var tur in SD.TurnosDiccionario)
+                        {
+                            if (tur.Key == PlanDiarioDTO.Turno)
+                            {
+                                <option value="@tur.Key" selected>@tur.Value</option>
+                            }
+                            else
+                            {
+                                <option value="@tur.Key">@tur.Value</option>
+                            }
+                        }
+                    </select>
+                </td>
+                <td>
+                 <a href="" @onclick="AbrirOpcionesExtendidas" @onclick:preventDefault>Mas...</a>
+            </td>
+            </tr>
+            <tr>
+                <td colspan="15" align="center">
+                    <button class="btn btn-outline-secondary" @onclick="Guardar">Guardar</button>
+                    <button class="btn btn-outline-secondary" @onclick="Cancelar">Cancelar</button>
+                </td>
+            </tr>
+        </table>
+    }
+}
+@code {
+    [Parameter]
+    public PlanificacionDiariaDTO PlanDiarioDTO { get; set; }
+
+    [Parameter]
+    public EventCallback<PlanificacionDiariaDTO> ActualizarPlanDiario { get; set; }
+
+    [Parameter]
+    public EventCallback<PlanificacionDiariaDTO> EliminarPlanDiario { get; set; }
+
+    [Parameter]
+    public EventCallback<PlanificacionDiariaDTO> MoverAOtroServicio { get; set; }
+
+    [Parameter]
+    public ServicioDTO servicioDTO { get; set; }
+
+    [Parameter]
+    public EventCallback<PlanificacionDiariaDTO> NuevoEstadoSegundoNivel { get; set; }
+
+    private string Estado = SD.EditEnum.LISTA.ToString();
+
+    private bool visibilidadFunOperativoCL = false;
+    private bool visibilidadNombrePuesto = false;
+    private bool visibilidadFechasInicioFin = false;
+    private bool visibilidadTipo = false;
+    private bool visibilidadOpciones = false;
+
+    public int idEstado = 0;
+
+    private OpcionesExtendidasEstado opcionesExtendidas = new();
+
+    private async Task Edicion()
+    {
+        PlanificacionDiariaDTO estadoEditando = await sessionStorage.GetItemAsync<PlanificacionDiariaDTO>(SD.SessionEdicionEstado);
+        if (estadoEditando == null)
+        {
+            await sessionStorage.SetItemAsync(SD.SessionEdicionEstado, PlanDiarioDTO);
+            Estado = SD.EditEnum.EDICION.ToString();
+        }
+        else
+        {
+            toastService.ShowWarning("Ya está editando un estado");
+        }
+    }
+    private async Task Guardar()
+    {
+        try{
+            Estado = SD.EditEnum.LISTA.ToString();
+            await ActualizarPlanDiario.InvokeAsync(PlanDiarioDTO);
+        }
+        catch (Exception ex)
+        {
+            await EstadoAnterior();
+            toastService.ShowError(ex.Message);
+        }
+    }
+    private async Task Cancelar()
+    {
+        Estado = SD.EditEnum.LISTA.ToString();
+        await EstadoAnterior();
+    }
+
+    private async Task EstadoAnterior()
+    {
+        PlanDiarioDTO = await sessionStorage.GetItemAsync<PlanificacionDiariaDTO>(SD.SessionEdicionEstado);
+        await sessionStorage.RemoveItemAsync(SD.SessionEdicionEstado);
+    }
+    private string ColorEstado(string estado)
+    {
+        return SD.EstadosComputosColor[estado];
+    }
+
+    private string CssParaSegundoNivel() => PlanDiarioDTO.SegundoNivel ? "BordeSegundoNivel" : "";
+
+    private string DatoFuncionarioCubreLibre(FuncionarioDTO func) => (func != null ? $"{func.Numero} - {func.NombreCorto()}" : "---");
+
+    private string FacturableIcono(bool dato) => dato ? "facturable.png" : "noFacturable.png";
+
+    private string RecorteObservaciones(string obs)
+    {
+        string recorteObs;
+
+        if (string.IsNullOrEmpty(obs))
+        {
+            recorteObs = "---";
+        }
+        else
+        {
+            if (obs.Length < 31)
+            {
+                recorteObs = obs;
+            }
+            else
+            {
+                recorteObs = $"{obs.Substring(0, 27)}...";
+            }
+        }
+        return recorteObs;
+    }
+
+    private string ImagenTipoFunOperativo(string tipo) => tipo != null ? SD.TipoFuncionarioOperativo[tipo] : null;
+
+    private string ImagenComienzoJornada() => PlanDiarioDTO.ComienzoJornada ? "comienzoJornada.png" : "vacio.png";
+
+    private async Task AsignarFechasAusencia(AusenciaDTO ausenciaDTO)
+    {
+        PlanDiarioDTO.AusenciaDTO = ausenciaDTO;
+        visibilidadFechasInicioFin = false;
+    }
+    private async Task AgregarSegundoNivel()
+    {
+        await NuevoEstadoSegundoNivel.InvokeAsync(PlanDiarioDTO);
+    }
+
+    private async Task SeleccionarTipoFuncionarioCL(FuncionarioDTO funcionario)
+    {
+        if (funcionario != null)
+        {
+            PlanDiarioDTO.FuncionarioSegundoNivel = $"{funcionario.Numero}-{funcionario.NombreCorto()}";
+        }else
+        {
+            PlanDiarioDTO.FuncionarioSegundoNivel = "";
+        }
+        visibilidadFunOperativoCL = false;
+    }
+
+    private async Task ObtenerNombrePuesto(string nombrePuesto)
+    {
+        if (!string.IsNullOrEmpty(nombrePuesto))
+        {
+            PlanDiarioDTO.NombrePuesto = nombrePuesto;
+        }
+        visibilidadNombrePuesto = false;
+    }
+    private async Task CambiarFuncionarioCubreLibre()
+    {
+        visibilidadFunOperativoCL = true;
+    }
+    private async Task CambiarNombrePuesto()
+    {
+        visibilidadNombrePuesto = true;
+    }
+    private async Task CambiarTipoFuncionario()
+    {
+        visibilidadTipo = true;
+    }
+
+    private async Task SeleccionarTipo(string tipo)
+    {
+        if (!string.IsNullOrEmpty(tipo))
+        {
+            PlanDiarioDTO.TipoFuncionarioOperativo = tipo;
+            visibilidadTipo = false;
+        }
+    }
+
+    private void SeleccionEstado(ChangeEventArgs e)
+    {
+        idEstado = SD.ConvertStringToInt(e.Value.ToString());
+        var computo = serviceEscalafon.EscalafonModel.ComputosDTO.SingleOrDefault(s => s.Id == idEstado);
+        if (computo != null)
+        {
+            PlanDiarioDTO.Computo = computo;
+            visibilidadFechasInicioFin = SD.EstadosComputosModal[computo.NombreDescriptivo];
+        }
+    }
+
+    private async Task AbrirOpcionesExtendidas()
+    {
+        opcionesExtendidas = new()
+            {
+                ComienzoJornada = PlanDiarioDTO.ComienzoJornada,
+                Facturable = PlanDiarioDTO.Facturable,
+                TotalHorasArmado = PlanDiarioDTO.CantidadHorasTotales
+            };
+        visibilidadOpciones = true;
+    }
+
+    public async Task ModificarOpcionesExt(OpcionesExtendidasEstado opcionesExt)
+    {
+        if (opcionesExt != null)
+        {
+            PlanDiarioDTO.ComienzoJornada = opcionesExt.ComienzoJornada;
+            PlanDiarioDTO.Extra = opcionesExt.Extra;
+            PlanDiarioDTO.Facturable = opcionesExt.Facturable;
+            PlanDiarioDTO.HoySegundoLibre = opcionesExt.HoySegundoLibre;
+            PlanDiarioDTO.CantidadHorasArmado = opcionesExt.TotalHorasArmado;
+            PlanDiarioDTO.CorrespondeAlDiaSiguiente = opcionesExt.CorrespondeAlDiaSiguiente;
+            visibilidadOpciones = false;
+        }
+    }
+
+    private async Task CerrarModal()
+    {
+        visibilidadFunOperativoCL = false;
+        visibilidadNombrePuesto = false;
+        visibilidadFechasInicioFin = false;
+        visibilidadTipo = false;
+        visibilidadOpciones = false;
+    }
+
+
+    private async Task ElegirOpcion(string opcion)
+    {
+        switch (opcion)
+        {
+            case "MOVER_A_SERVICIO":
+                await MoverAOtroServicio.InvokeAsync(PlanDiarioDTO);
+                break;
+
+                case "PASAR_A_ROTATIVO":
+
+                    break;
+
+                case "ELIMINAR_DE_ESCALAFON":
+                             await EliminarPlanDiario.InvokeAsync(PlanDiarioDTO);
+                    break;
+
+                case "DAR_BAJA_FUNCIONARIO":
+
+                    break;
+            }
+        }
+        
+
+}

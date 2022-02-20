@@ -1,0 +1,231 @@
+﻿@page "/VisorHorariosServicio/{idServicio:int}"
+@layout EmptyLayout
+@inject ILocalStorageService localStorage
+@inject IServiceDataEscalafon serviceDataEscalafon
+@inject NavigationManager nav
+@inject IJSRuntime js
+
+<div class="card m-2 p-5 scrolVertical">
+<h3>Visor Horarios Servicio</h3>
+
+<h6>Fecha: @fechaNavegacionActual.ToString("dddd dd MMMM yyyy")</h6>
+ @if (PlanificacionesDTO != null && PlanificacionesDTO.Count > 0)
+            {
+    
+    <table class="table table-striped table-sm tamanioFuenteVisor">
+        <tr>
+            <th>Tipo</th>
+            <th>CJ</th>
+            <th>Estado</th>
+            <th>Nro.</th>
+            <th>Funcionario</th>
+            <th>Entrada</th>
+            <th>Salida</th>
+            <th>Horas Totales</th>
+            <th>Horas Extras</th>
+            <th>Horas Armado</th>
+            <th>Puesto</th>
+            <th>Observaciones</th>
+            <th>Facturable</th>
+            <th>2do libre</th>
+        </tr>
+        @foreach (var plan in PlanificacionesDTO)
+        {
+            <tr>
+                <td title="Tipo Funcionario : @plan.TipoFuncionarioOperativo" style="width:2.5%">
+                    <img src="iconosPuesto/@ImagenTipoFunOperativo(plan.TipoFuncionarioOperativo)" class="imgEstado" />
+                </td>
+                <td title="Comienzo de jornada" style="width:2%">
+                    <img src="iconosPuesto/iconEstados/@ImagenComienzoJornada(plan.ComienzoJornada)" class="imgEstadoIndicador" />
+                </td>
+                <td title="Estado Funcionario Operativo" style="width:7%">
+                    <div style="padding:1px 3px;border-radius:3px;background-color:@(ColorEstado(plan.Computo.NombreDescriptivo))">
+                        @plan.Computo.NombreDescriptivo
+                    </div>
+                </td>
+                <td title="Nro. Funcionario Operativo" style="width:4%" align="center">@plan.FuncionarioOperativo.Numero</td>
+                <td title="Nombre Funcionario Operativo: @plan.FuncionarioOperativo.ToString()" style="width:12%" align="left">
+                    <ImgRotativo TipoResumido="@plan.TipoResumido"/>
+                    @plan.FuncionarioOperativo.NombreCorto()
+                </td>
+                <td title="Hora Entrada" style="width:4%" align="center">@plan.HoraEntrada.ToString("HH:mm")
+                     <img src="iconosPuesto/iconEstados/@IndicadorJornadaDiaSiguiente(@plan.HoraEntrada)" class="imgEstadoIndicadorFechasiguiente" />
+                </td>
+                <td title="Hora Salida" style="width:4%" align="center">@plan.HoraSalida.ToString("HH:mm")
+                    <img src="iconosPuesto/iconEstados/@IndicadorJornadaDiaSiguiente(@plan.HoraSalida)" class="imgEstadoIndicadorFechasiguiente" />
+                </td>
+                <td title="Horas totales" style="width:3%" align="center">@plan.CantidadHorasTotales</td>
+                <td title="Horas extras" style="width:3%" align="center">@plan.CantidadHorasExtras</td>
+                <td title="Horas armado" style="width:3%" align="center">@plan.CantidadHorasArmado</td>
+                <td title="Puesto: @plan.NombrePuesto" style="width:9%">@plan.NombrePuestoCorto()</td>
+                <td title="Observaciones : @plan.Observaciones" style="width:15%" align="left">@RecorteObservaciones(plan.Observaciones)</td>
+                <td title="Facturable"><img src="iconosPuesto/iconEstados/@FacturableIcono(plan.Facturable)" class="imgEstado" /></td>
+                <td title="Hoy Segundo Libre"><img src="iconosPuesto/iconEstados/@HoySegundoLibreIcono(plan.HoySegundoLibre)" class="imgEstado" /></td>
+            </tr>
+            }
+        </table>
+    }
+    else
+    {
+        <p style="font-weight:bold;color:red;font-size:12px">No hay registros para esta fecha</p>
+    }
+
+
+    
+  
+</div>
+
+  <div class="footer">
+  <div class="d-flex justify-content-center">
+        @if (HabilitadoAtras){
+                  <a href="" @onclick="IrAtras" @onclick:preventDefault style="margin-right:15px" title="Ir a dia anterior">
+                       <img src="/icons/flechaAtras.png" class="imgEstado" />
+                  </a>
+                    }
+                else
+                    {
+                         <a href="" @onclick="IrAtras" @onclick:preventDefault style="margin-right:15px" class="pointerNullHover btonDeshabilitado" title="Ir a dia anterior">
+                       <img src="/icons/flechaAtras.png" class="imgEstado" />
+                  </a>
+                    }
+
+        @if (HabilitadoAdelante){
+                 <a href="" @onclick="IrAdelante" @onclick:preventDefault title="Ir a dia siguiente">
+                       <img src="/icons/flechaAdelante.png" class="imgEstado" />
+                </a>
+                    }
+                 else
+                    {
+                     <a href="" @onclick="IrAdelante" @onclick:preventDefault class="pointerNullHover btonDeshabilitado" title="Ir a dia siguiente">
+                       <img src="/icons/flechaAdelante.png" class="imgEstado" />
+                </a>
+                }
+    </div>
+    </div>
+
+@code {
+    [Parameter]
+    public int idServicio { get; set; }
+
+    private List<PlanificacionDiariaDTO> PlanificacionesDTO { get; set; }
+    private UsuarioDTO usuarioDTO;
+    private DateTime fechaLimiteInferior;
+    private DateTime fechaLimiteSuperior;
+    private DateTime fechaFiltro;
+    private DateTime fechaNavegacionActual;
+
+    private bool HabilitadoAtras = true;
+    private bool HabilitadoAdelante = true;
+
+    private VisorHistorialServicio visor;
+
+
+    protected async override Task OnInitializedAsync()
+    {
+        await Iniciar();
+    }
+
+    protected async override Task OnParametersSetAsync()
+    {
+        await Iniciar();
+    }
+
+    private async Task Iniciar()
+    {
+        try
+        {
+            usuarioDTO = await localStorage.GetItemAsync<UsuarioDTO>(SD.LocalUsuario);
+            if (usuarioDTO == null)
+                nav.NavigateTo("/", true);
+
+            visor = await localStorage.GetItemAsync<VisorHistorialServicio>(SD.VisorHistorialServicio);
+            if (visor == null)
+                throw new Exception("No se ha pasado ningun valor de servicio");
+
+            if ( visor.ServicioDTORef.Id != idServicio)
+                throw new Exception("El Servicio no coincide con lo pasado por parámetro");
+
+            fechaLimiteInferior = visor.FechaPlanificacionActual.Date.AddDays(-10);
+            fechaLimiteSuperior = visor.FechaPlanificacionActual.Date.AddDays(10);
+            fechaFiltro = visor.FechaPlanificacionActual.Date;
+            fechaNavegacionActual = visor.FechaPlanificacionActual.Date.AddDays(-1);
+
+            PlanificacionesDTO = await serviceDataEscalafon.ObtenerPlanificacionServicio(visor, usuarioDTO.Token);
+            StateHasChanged();
+
+        }
+        catch(Exception ex)
+        {
+            await js.MsgAdvertencia(ex.Message);
+        }
+    }
+
+    private async Task IrAdelante()
+    {
+        fechaNavegacionActual = fechaNavegacionActual.AddDays(1);
+        if (fechaNavegacionActual == fechaFiltro)
+            fechaNavegacionActual = fechaNavegacionActual.AddDays(1);
+
+        if (fechaNavegacionActual == fechaLimiteSuperior)
+            HabilitadoAdelante = false;
+        else
+            HabilitadoAtras = true;
+
+        visor.FechaPlanificacionActual = fechaNavegacionActual;
+        PlanificacionesDTO = await serviceDataEscalafon.ObtenerPlanificacionServicio(visor, usuarioDTO.Token);
+        StateHasChanged();
+        
+    }
+
+     private async Task IrAtras()
+    {
+         fechaNavegacionActual = fechaNavegacionActual.AddDays(-1);
+        if (fechaNavegacionActual == fechaFiltro)
+            fechaNavegacionActual = fechaNavegacionActual.AddDays(-1);
+
+        if (fechaNavegacionActual == fechaLimiteInferior)
+            HabilitadoAtras = false;
+        else
+             HabilitadoAdelante = true;
+
+        visor.FechaPlanificacionActual = fechaNavegacionActual;
+        PlanificacionesDTO = await serviceDataEscalafon.ObtenerPlanificacionServicio(visor, usuarioDTO.Token);
+        StateHasChanged();
+    }
+
+    private string ImagenTipoFunOperativo(string tipo) => tipo != null ? SD.TipoFuncionarioOperativo[tipo] : null;
+    private string ImagenComienzoJornada(bool cj) => cj ? "comienzoJornada.png" : "vacio.png";
+
+    private string ColorEstado(string estado)
+    {
+        return SD.EstadosComputosColor[estado];
+    }
+
+    private string CssParaSegundoNivel(bool segundoNivel) => segundoNivel ? "BordeSegundoNivel" : "";
+    private string FacturableIcono(bool dato) => dato ? "facturable.png" : "noFacturable.png";
+    private string HoySegundoLibreIcono(bool dato) => dato ? "indicadordoLibreHoy.png" : "vacio.png";
+     private string RecorteObservaciones(string obs)
+    {
+        string recorteObs;
+
+        if (string.IsNullOrEmpty(obs))
+        {
+            recorteObs = "---";
+        }
+        else
+        {
+            if (obs.Length < 31)
+            {
+                recorteObs = obs;
+            }
+            else
+            {
+                recorteObs = $"{obs.Substring(0, 27)}...";
+            }
+        }
+        return recorteObs;
+    }
+
+     private string IndicadorJornadaDiaSiguiente(DateTime horario) => horario.Date > visor.FechaPlanificacionActual.Date ? "siguienteDia.png" : "vacio.png";
+
+}

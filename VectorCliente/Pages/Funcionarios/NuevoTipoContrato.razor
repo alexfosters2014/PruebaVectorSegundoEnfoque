@@ -1,0 +1,91 @@
+﻿@page "/TipoContrato/Nuevo"
+@inject NavigationManager nav
+@inject ILocalStorageService localStorage
+@inject IJSRuntime js
+@inject IServiceFuncionario serviceFuncionario
+
+
+<h3>Nuevo Tipo Contrato</h3>
+@if (tc != null) { 
+<section class="container">
+    <EditForm Model="tc" OnValidSubmit="NuevoTC">
+        <DataAnnotationsValidator />
+        <div class="form-group row">
+            <label for="Descripcion" class="col-4 col-form-label">Descripcion*</label>
+            <InputText @bind-Value="tc.Descripcion" id="Descripcion" class="col-7 form-control" />
+            <ValidationMessage For="@( () => tc.Descripcion)" />
+        </div>
+        <div class="form-group row">
+            <label for="tipoNuevoTC" class="col-4 col-form-label">Tipo*</label>
+            <select @bind="@tipoEnum" id="tipoNuevoTC" class="col-5 form-control">
+                <option value="-1">Ninguno</option>
+                @foreach (var tcc in SD.tipo)
+                {
+                    <option value="@tcc.Value">@tcc.Key</option>
+                }
+            </select>
+        </div>
+        <div class="form-group row">
+            <label for="cargaTrabajo" class="col-4 col-form-label">Carga Horaria Diaria(hrs)*</label>
+            <InputNumber @bind-Value="tc.CargaTrabajoDiaria" id="cargaTrabajo" class="col-7 form-control" />
+            <ValidationMessage For="@( () => tc.CargaTrabajoDiaria)" />
+        </div>
+        <div class="form-group row">
+            <label for="cargaTrabajo" class="col-4 col-form-label">Carga Horaria Semanal(hrs)*</label>
+            <InputNumber @bind-Value="tc.CargaTrabajoSemanal" id="cargaTrabajo" class="col-7 form-control" />
+            <ValidationMessage For="@( () => tc.CargaTrabajoSemanal)" />
+        </div>
+        <div class="form-group row">
+            <label for="modalidad" class="col-4 col-form-label">Modalidad*</label>
+            <InputText @bind-Value="tc.Modalidad" id="modalidad" class="col-7 form-control" />
+            <ValidationMessage For="@( () => tc.Modalidad)" />
+        </div>
+        <div class="col text-center">
+            <button type="submit" class="btn btn-primary mr-1">Agregar</button>
+            <button type="button" class="btn btn-primary ml-1" @onclick="Cancelar">Cancelar</button>
+        </div>
+    </EditForm>
+</section>
+}
+
+@code {
+    TipoContratoDTO tc = new TipoContratoDTO();
+    int tipoEnum = -1;
+    UsuarioDTO usuario;
+
+    protected async override Task OnInitializedAsync()
+    {
+        usuario = await localStorage.GetItemAsync<UsuarioDTO>(SD.LocalUsuario);
+        if (usuario == null)
+        {
+            nav.NavigateTo("/", true);
+        }
+    }
+
+    private async Task NuevoTC()
+    {
+        try
+        {
+            if (tipoEnum == -1)
+            {
+                await js.MsgAdvertencia("No ha seleccionado ningun tipo");
+                return;
+            }
+            var tcNuevo = await serviceFuncionario.AgregarTipoContrato(tc, usuario.Token);
+            if (tcNuevo != null)
+            {
+                await js.MsgExitoso("Se ha agregado un nuevo tipo de contrato");
+                nav.NavigateTo("Funcionarios");
+            }
+        }
+        catch (Exception ex)
+        {
+            await js.MsgAdvertencia(ex.Message);
+        }
+    }
+
+    private void Cancelar()
+    {
+        nav.NavigateTo("Funcionarios");
+    }
+}

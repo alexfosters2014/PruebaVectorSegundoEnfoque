@@ -1,0 +1,72 @@
+﻿@inherits LayoutComponentBase
+@inject ILocalStorageService localStorage
+@inject IToastService toastService
+@inject NavigationManager nav
+@inject IJSRuntime js
+
+<Animate>
+<div class="page">
+    
+    <div class="sidebar @Esconder">
+        @if(usuario != null)
+            {
+             <NavMenuAdmin usuario="usuario"/>
+            }
+    </div>
+
+    <div class="main animated bounceOutDown infinite">
+        <div class="top-row px-4">
+            <a href="" class="navbar-brand" @onclick="Toggle" @onclick:preventDefault>
+                <img src="icons/hamburguesa.png" class="imgTable" />
+            </a>
+            <a href="" class="ml-md-auto" @onclick="Salir" @onclick:preventDefault>Salir</a>
+        </div>
+
+        <div class="content px-4">
+            @Body
+        </div>
+    </div>
+    
+</div>
+
+</Animate>
+
+<BlazoredToasts Position="Blazored.Toast.Configuration.ToastPosition.TopCenter"
+                IconType="IconType.FontAwesome"
+                InfoIcon="fa fa-info" />
+
+@code{
+
+    private UsuarioDTO usuario;
+
+    private bool toggle = true;
+
+    protected async override Task OnInitializedAsync()
+    {
+        await CargaInicialMenu();
+    }
+
+    private async Task CargaInicialMenu()
+    {
+        usuario = await localStorage.GetItemAsync<UsuarioDTO>(SD.LocalUsuario);
+        if (usuario == null)
+        {
+            nav.NavigateTo("/", true);
+            return;
+        }
+    }
+
+    private void Toggle()
+    {
+        toggle = !toggle;
+    }
+
+    private string Esconder => !toggle ? "collapse" : null; 
+
+    private async Task Salir()
+    {
+        await localStorage.ClearAsync();
+        nav.NavigateTo("/", true);
+    }
+
+}

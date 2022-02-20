@@ -1,0 +1,125 @@
+﻿@inject ServiceEscalafon serviceEscalafon
+@inject IJSRuntime js
+@inject IToastService toastService
+
+<SfDialog Width="500px" Target="#target" IsModal="true" @bind-Visible="Visibilidad">
+    <DialogTemplates>
+        <Header> Nombre de Puesto </Header>
+        <Content>
+            <div class="form-group">
+                <div class="row justify-content-center">
+                    <input @bind="nuevo" class="form-control col-12 borderActive" />
+                    <button class="btn btn-primary col-5 mr-2" @onclick="AgregarNombrePuestoNuevo">Agregar Nuevo</button>
+                    <button class="btn btn-primary col-5 ml-2" @onclick="DejarSinNombrePuesto">Sin Puesto</button>
+                </div>
+            </div>
+            <Divider Altura="15px" />
+            @if (nombresPuestosDTO != null)
+            {
+                <table class="table table-borderless">
+
+                    @foreach (var np in nombresPuestosDTO)
+                    {
+                        <tr>
+                            <td>@np.Nombre</td>
+                            <td>
+                                <a href="" @onclick="() => DevolverNombrePuesto(np.Id)" @onclick:preventDefault>
+                                    <img src="icons/selector.png" class="imgTable" />
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </table>
+            }
+        </Content>
+    </DialogTemplates>
+    <DialogButtons>
+        <DialogButton Content="Cerrar" IsPrimary="true" OnClick="@CerrarModal" />
+    </DialogButtons>
+    @*<DialogEvents OnOpen="@DialogOpen" Closed="@DialogClose" OnOverlayModalClick="@OverlayClick"></DialogEvents>*@
+    <DialogAnimationSettings Effect="@DialogEffect.Fade"></DialogAnimationSettings>
+</SfDialog>
+<style>
+    #target {
+        max-height: 800px;
+        height: 100%;
+    }
+</style>
+@code {
+    [Parameter]
+    public bool Visibilidad { get; set; }
+
+    [Parameter]
+    public ServicioDTO servicioDTO { get; set; }
+
+    [Parameter]
+    public EventCallback<string> ObtenerNombrePuestoDTO { get; set; }
+
+    private string nuevo;
+
+    private List<NombrePuestoDTO> nombresPuestosDTO = new();
+    protected async override Task OnInitializedAsync()
+    {
+        await ObtenerNombresPuestos();
+    }
+    protected async override Task OnParametersSetAsync()
+    {
+        await ObtenerNombresPuestos();
+    }
+
+    private async Task CerrarModal()
+    {
+        await ObtenerNombrePuestoDTO.InvokeAsync(null);
+    }
+
+    private async Task ObtenerNombresPuestos()
+    {
+        nombresPuestosDTO = await serviceEscalafon.ObtenerNombresPuestos(new GeneralTransport() { Valor = servicioDTO.Id });
+    }
+
+    private async Task DevolverNombrePuesto(int id)
+    {
+        NombrePuestoDTO aux = nombresPuestosDTO.SingleOrDefault(s => s.Id == id);
+        if (aux == null)
+        {
+            await js.MsgAdvertencia("No ha seleccionado ningun nombre de puesto");
+            return;
+        }
+        await ObtenerNombrePuestoDTO.InvokeAsync(aux.Nombre);
+    }
+
+    private async Task DejarSinNombrePuesto()
+    {
+        await ObtenerNombrePuestoDTO.InvokeAsync("---");
+    }
+    
+
+    private async Task AgregarNombrePuestoNuevo()
+    {
+        try
+        {
+            var nombrePuesto = await serviceEscalafon.AgregarNombrePuestoNuevo(new NombrePuestoDTO()
+            {
+                Nombre = nuevo.ToUpper(),
+                Servicio = servicioDTO
+            });
+
+            if (nombrePuesto != null)
+            {
+                nombresPuestosDTO.Add(nombrePuesto);
+                toastService.ShowSuccess("Se ha creado con éxito");
+            }
+            else
+            {
+                toastService.ShowWarning("No se pudo registrar en nombre de puesto");
+            }
+
+        }
+        catch (Exception ex)
+        {
+            await js.MsgAdvertencia(ex.Message);
+        }
+    }
+
+}
+

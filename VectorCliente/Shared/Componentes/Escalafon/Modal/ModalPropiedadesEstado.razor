@@ -1,0 +1,71 @@
+﻿@inject ServiceEscalafon serviceEscalafon
+@inject IJSRuntime js
+@inject IToastService toastService
+
+<SfDialog Width="500px" Target="#target" IsModal="true" @bind-Visible="Visibilidad">
+    <DialogTemplates>
+        <Header>Opciones extendidas</Header>
+        <Content>
+            <div class="form-group">
+
+                <div class="form-group row">
+                        <label for="comJorModal" class="col-4 col-form-label">Comienzo de Jornada</label>
+                        <SfSwitch @bind-Checked="opcionesExtendidas.ComienzoJornada"></SfSwitch>
+                </div>
+
+                <div class="form-group row">
+                        <label for="ExtraModal" class="col-4 col-form-label">Extra</label>
+                        <SfSwitch @bind-Checked="opcionesExtendidas.Extra"></SfSwitch>
+                </div>
+
+                <div class="form-group row">
+                        <label for="FacturableModal" class="col-4 col-form-label">Facturable</label>
+                        <SfSwitch @bind-Checked="opcionesExtendidas.Facturable"></SfSwitch>
+                </div>
+
+                  <div class="form-group row">
+                        <label for="CorrespondeDiaSiguiente" class="col-4 col-form-label">Designar horarios al dia siguiente</label>
+                        <SfSwitch @bind-Checked="opcionesExtendidas.CorrespondeAlDiaSiguiente"></SfSwitch>
+                </div>
+
+                <div class="form-group row">
+                        <label for="FacturableModal" class="col-4 col-form-label">Designar hoy segundo dia libre</label>
+                        <SfSwitch @bind-Checked="opcionesExtendidas.HoySegundoLibre"></SfSwitch>
+                </div>
+
+                  <div class="form-group row">
+                            <label for="totArmadoModal" class="col-4 col-form-label">Cantidad Horas Armado</label>
+                            <input type="number" step="0.01" min="0" max="24" @bind="opcionesExtendidas.TotalHorasArmado" id="totArmadoModal" class="col-7 form-control" />
+                  </div>
+         </div>
+        </Content>
+    </DialogTemplates>
+    <DialogButtons>
+        <DialogButton Content="Ok" IsPrimary="true" OnClick="@AgregarPropiedadesExt" />
+    </DialogButtons>
+    @*<DialogEvents OnOpen="@DialogOpen" Closed="@DialogClose" OnOverlayModalClick="@OverlayClick"></DialogEvents>*@
+    <DialogAnimationSettings Effect="@DialogEffect.Fade"></DialogAnimationSettings>
+</SfDialog>
+<style>
+    #target {
+        max-height: 800px;
+        height: 100%;
+    }
+</style>
+@code {
+    [Parameter]
+    public bool Visibilidad { get; set; }
+
+    [Parameter]
+    public EventCallback<OpcionesExtendidasEstado> AgregarPropiedadesExtendidas { get; set; }
+
+    [Parameter] 
+    public OpcionesExtendidasEstado opcionesExtendidas { get; set; }
+
+    private async Task AgregarPropiedadesExt()
+    {
+        await AgregarPropiedadesExtendidas.InvokeAsync(opcionesExtendidas);
+        Visibilidad = false;
+    }
+
+}

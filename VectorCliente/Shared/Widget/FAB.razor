@@ -1,0 +1,46 @@
+﻿
+@inject IToastService toastService
+
+<div class="fab-container">
+		<div class="fab fab-icon-holder">
+			<i class="bi bi-three-dots"></i>
+		</div>	
+
+		<ul class="fab-options">
+			<li>
+				<span class="fab-label">Mover a Servicio</span>
+				<div class="fab-icon-holder">
+					<i class="bi bi-truck" @onclick="() => ElegirOpcion(SD.OpcionesFABEnum.MOVER_A_SERVICIO.ToString())"></i>
+				</div>
+			</li>
+			<li>
+				<span class="fab-label">Pasar a Rotativo</span>
+				<div class="fab-icon-holder">
+					<i class="bi bi-cloud-download-fill" @onclick="() => ElegirOpcion(SD.OpcionesFABEnum.PASAR_A_ROTATIVO.ToString())"></i>
+				</div>
+			</li>
+			<li>
+				<span class="fab-label">Eliminar Estado del Escalafón</span>
+				<div class="fab-icon-holder">
+					<i class="bi bi-emoji-smile-fill" @onclick="() => ElegirOpcion(SD.OpcionesFABEnum.ELIMINAR_DE_ESCALAFON.ToString())"></i>
+				</div>
+			</li>
+			<li>
+				<span class="fab-label">Dar de Baja Funcionario</span>
+				<div class="fab-icon-holder">
+					<i class="bi bi-emoji-smile-fill" @onclick="() => ElegirOpcion(SD.OpcionesFABEnum.DAR_BAJA_FUNCIONARIO.ToString())"></i>
+				</div>
+			</li>
+		</ul>
+</div>
+
+
+@code {
+	[Parameter]
+	public EventCallback<string> Opcion { get; set; }
+
+	private async Task ElegirOpcion(string opc)
+	{
+		await Opcion.InvokeAsync(opc);
+	}
+}

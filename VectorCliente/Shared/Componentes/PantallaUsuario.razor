@@ -1,0 +1,170 @@
+﻿@inject IJSRuntime js
+@inject IServiceUsuario serviceUsuario
+
+<section class="container">
+   
+    <div class="row">
+        <article class="col-8">
+            @if (usuarios != null && usuarios.Any())
+            {
+                <table class="table">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th scope="col">Usuario</th>
+                            <th scope="col">Rol</th>
+                            <th scope="col">Mesa Operativa</th>
+                            <th scope="col">Nivel</th>
+                            <th scope="col">Activo</th>
+                            <th scope="col"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var us in usuarios)
+                        {
+                            <tr>
+                                <td>@us.NombreUsuario</td>
+                                <td>@us.Rol.RolAsignado</td>
+                                <td>@(us.MesaOperativa != null ? us.MesaOperativa.Nombre : "")</td>
+                                <td>@us.Rol.Nivel</td>
+                                <td><IndicadorActivo Activo="@us.Activo" /></td>
+                              <td><a href="" @onclick="(() => Eliminar(us.Id))" @onclick:preventDefault><IconEdit Icon="delete" /></a></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        <div class="d-flex justify-content-center">
+            <a href="" @onclick="NuevoPantalla" @onclick:preventDefault><IconEdit Icon="add" /></a>
+        </div>
+        </article>
+       
+        <article class="col-4">
+            @if (aparecer)
+            {
+                <h3>Nuevo</h3>
+            <EditForm Model="usuario" OnValidSubmit="NuevoUsuario">
+                <DataAnnotationsValidator />
+                <div class="form-group">
+                    <label for="nombre">Nombre de usuario*</label>
+                    <InputText @bind-Value="usuario.NombreUsuario" id="nombre" class="form-control" />
+                    <ValidationMessage For="@( () => usuario.NombreUsuario)" />
+                </div>
+                <div class="form-group">
+                    <label for="tipoRol">Rol*</label>
+                    <select @bind="@rolSeleccionado" id="tipoRol" class="form-control">
+                        <option value="0" selected>Ninguna</option>
+                        @foreach (var rol in roles)
+                        {
+                            <option value="@rol.Id">@rol.RolAsignado (Niv. @rol.Nivel)</option>
+                        }
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email*</label>
+                    <InputText @bind-Value="usuario.Email" id="email" class="form-control" />
+                    <ValidationMessage For="@( () => usuario.Email)" />
+                </div>
+                <div class="form-group">
+                    <label for="tipo">Mesa Operativa*</label>
+                    <select @bind="@mesaOpSeleccionado" id="tipo" class="form-control">
+                        <option value="0" selected>Ninguna</option>
+                        @foreach (var mop in mesaOperativas)
+                        {
+                            <option value="@mop.Id">@mop.Nombre</option>
+                        }
+                    </select>
+                </div>
+                <div class="col text-center">
+                    <button type="submit" class="btn btn-primary">Agregar</button>
+                    <button type="button" class="btn btn-primary" @onclick="Cancelar">Cancelar</button>
+                </div>
+            </EditForm>
+            }
+        </article>
+       
+
+    </div>
+</section>
+
+
+
+@code {
+    [Parameter]
+    public List<UsuarioDTO> usuarios { get; set; }
+    [Parameter]
+    public List<RolDTO> roles { get; set; }
+    [Parameter]
+    public List<MesaOperativaDTO> mesaOperativas { get; set; }
+    [Parameter]
+    public UsuarioDTO usuarioLoegueado { get; set; }
+
+    private UsuarioDTO usuario = new UsuarioDTO();
+
+    private bool aparecer = false;
+    private string titulo;
+    private int rolSeleccionado=0;
+    private int mesaOpSeleccionado=0;
+    private UsuarioDTO usuarioLogueado;
+
+
+    private void NuevoPantalla()
+    {
+        aparecer = true;
+    }
+
+    private async Task Eliminar(int id)
+    {
+        try
+        {
+            bool confirmacion = await js.MsgConfirmacion("Desea eliminar usuario?");
+            if (confirmacion) {
+                await serviceUsuario.Eliminar(id, usuarioLoegueado.Token);
+                UsuarioDTO remover = usuarios.Find(f => f.Id == id);
+                usuarios.Remove(remover);
+                StateHasChanged();
+                await js.MsgExitoso("Usuario borrado");
+            }
+        }
+        catch(Exception ex)
+        {
+            await js.MsgError(ex.Message);
+        }
+    }
+    private async Task NuevoUsuario()
+    {
+        try
+        {
+            if (rolSeleccionado == 0)
+            {
+                await js.MsgAdvertencia("No ha seleccionado ningun rol. Verifique");
+                return;
+            }
+            RolDTO rol = roles.Find(r => r.Id == rolSeleccionado);
+
+            //int idMesa = Int32.Parse(mesaOpSeleccionado);
+           
+            MesaOperativaDTO mesa = mesaOperativas.Find(m => m.Id == mesaOpSeleccionado);
+
+            usuario.Rol = rol;
+            usuario.MesaOperativa = mesa;
+            usuario.Activo = true;
+
+            var resultado = await serviceUsuario.Agregar(usuario, usuarioLoegueado.Token);
+            usuario.Id = resultado.Id;
+            usuarios.Add(usuario);
+            aparecer = false;
+            usuario = new UsuarioDTO();
+            StateHasChanged();
+            await js.MsgExitoso("Se ha creado un nuevo usuario");
+        }
+        catch (Exception ex)
+        {
+            await js.MsgError(ex.Message);
+        }
+    }
+    private void Cancelar()
+    {
+        usuario = new UsuarioDTO();
+        aparecer = false;
+    }
+}

@@ -1,0 +1,288 @@
+﻿@inject IJSRuntime js
+@inject ServiceEscalafon serviceEscalafon
+@inject IToastService toastService
+@inject NavigationManager nav
+@inject ISessionStorageService sessionStorage 
+@inject ILocalStorageService localStorage
+
+<ModalCambioDeServicio CerrarModal="CerrarModal" Visibilidad="VisibilidadMoverServicio" CambiarDeServicio="MoverAOtroServicio"/>
+
+<section class="recuadroAutorizaciones">
+    @if (Servicio != null)
+    {
+        <h6 class="estiloTituloServicio">@Servicio.NombreDescriptivo (@Servicio.Direccion)
+            <a href="" @onclick="VerPrefFS" @onclick:preventDefault><IconEdit Icon="preferenciaFunServicio" Titulo="Ver Preferencias Funcionario en servicio"/></a>
+            <a href="" @onclick="VisorEstadosEnServicio" @onclick:preventDefault><IconEdit Icon="HistoricoServicio" Titulo="Ver Historico de Servicio"/></a>
+        </h6>
+    }
+    @if (turnosEstados != null && EstadosDiarios.Count > 0)
+    {
+
+        @foreach (var turno in turnosEstados)
+           {
+
+            <article>
+                <p class="estiloTituloTurno">
+                @SD.TurnosDiccionario[turno.Turno]</p>
+                <div>
+                    @foreach (var estado in turno.PlanesDTO)
+                    {
+                        
+                             
+                                      <EstadoContenedor @key="estado.Id"
+                                                        PlanDiarioDTO="estado" 
+                                                        ActualizarPlanDiario="ActualizarPlanDiario" 
+                                                        EliminarPlanDiario="EliminarPlanDiario" servicioDTO="Servicio"
+                                                        NuevoEstadoSegundoNivel="NuevoEstadoSegundoNivel" 
+                                                        MoverAOtroServicio = "HabilitarModalMoverAOtroServicio"/>
+                           
+                    }
+                </div>
+            </article>
+           
+        }
+    }
+    @if (EstadosDiarios != null && EstadosDiarios.Count == 0)
+    {
+        <p style="color:orangered;font-size:0.8rem">No hay planificación realizada para este servicio</p>
+    }
+    <Divider Altura="15px" />
+    <div class="d-flex justify-content-center">
+        <a href="" @onclick="NuevoEstado" @onclick:preventDefault><IconEdit Icon="add" /></a>
+    </div>
+    
+    @if(planNuevoEnServicio != null) { 
+    <NuevoEstadoEnServicio  PlanDiarioDTO="planNuevoEnServicio" 
+                            RegistrarPlanDiario="RegistrarPlanDiario" 
+                            servicioDTO="Servicio"
+                            CancelarNuevoEstado="CancelarNuevoEstado"/>
+    }
+   
+</section>
+
+@code {
+    [Parameter]
+    public ServicioDTO Servicio { get; set; }
+
+    [Parameter]
+    public List<PlanificacionDiariaDTO> EstadosDiarios { get; set; }
+
+    private List<TurnoPuestos> turnosEstados;
+
+    PlanificacionDiariaDTO planNuevoEnServicio = null;
+
+    private bool VisibilidadMoverServicio = false;
+
+    PlanificacionDiariaDTO estadoAMover = null;
+
+    [Parameter]
+    public EventCallback<ServicioDTO> VerPrefFuncionarioServicio { get; set; }
+
+    public bool momentoFiltrado { get; set; } = false;
+
+
+
+    protected async override Task OnInitializedAsync()
+    {
+        //await ActualizarTurnos();
+    }
+
+    protected async override Task OnParametersSetAsync()
+    {
+        await ActualizarTurnos();
+    }
+
+    private void CerrarModal()
+    {
+        VisibilidadMoverServicio = false;
+    }
+
+    private async Task ActualizarTurnos()
+    {
+        turnosEstados = new();
+        turnosEstados = EstadosDiarios
+                                       .OrderBy(o => o.Turno)
+                                       .ThenBy(t => t.Orden)
+                                       .GroupBy(g => g.Turno)
+                                       .Select(s => new TurnoPuestos()
+                                           {
+                                               Turno = s.Key,
+                                               PlanesDTO = s.ToList()
+                                           })
+                                        .ToList();
+    }
+
+
+    private async Task NuevoEstado()
+    {
+        planNuevoEnServicio = new()
+        {
+            Fecha = serviceEscalafon.FechaPlanificacion,
+            Orden = Generador.GenerarGUID(),
+            FuncionarioOperativo = new(),
+            HoraEntrada = serviceEscalafon.FechaPlanificacion,
+            HoraSalida = serviceEscalafon.FechaPlanificacion,
+            Turno = 6,
+            FuncionarioSegundoNivel = "",
+            Facturable = true,
+            Servicio = Servicio,
+            ComienzoJornada = false,
+            NombrePuesto = "---",
+            TipoFuncionarioOperativo = "CIVIL",
+            SegundoNivel = false,
+            MostrarEnEscalafon = true,
+            IdMesaOperativa = serviceEscalafon.IdMesaOperativaEnPlanificacion
+        };
+
+    }
+
+    private async Task NuevoEstadoSegundoNivel(PlanificacionDiariaDTO planDTO) //es un eventcallback
+    {
+        try
+        {
+
+            planNuevoEnServicio = new()
+                {
+                    Fecha = serviceEscalafon.FechaPlanificacion,
+                    Orden = planDTO.Orden,
+                    FuncionarioOperativo = await serviceEscalafon.ObtenerFuncionarioSegunNumero(planDTO.FuncionarioSegundoNivel),
+                    HoraEntrada = planDTO.HoraEntrada,
+                    HoraSalida = planDTO.HoraSalida,
+                    Turno = planDTO.Turno,
+                    FuncionarioSegundoNivel = "---",
+                    Facturable = planDTO.Facturable,
+                    Servicio = Servicio,
+                    ComienzoJornada = planDTO.ComienzoJornada,
+                    NombrePuesto = planDTO.NombrePuesto,
+                    TipoFuncionarioOperativo = "CIVIL",
+                    Extra = planDTO.Extra,
+                    SegundoNivel = true,
+                    MostrarEnEscalafon = true,
+                    IdMesaOperativa = serviceEscalafon.IdMesaOperativaEnPlanificacion
+                };
+        }catch(Exception ex)
+        {
+            toastService.ShowError(ex.Message);
+        }
+    }
+
+    private async Task RegistrarPlanDiario(PlanificacionDiariaDTO plan)
+    {
+        try
+        {
+            PlanificacionDiariaDTO planNuevo = await serviceEscalafon.AgregarEstado(plan);
+            if (planNuevo == null)
+            {
+                toastService.ShowWarning("No se pudo registrar");
+                return;
+            }
+            planNuevoEnServicio = null;
+            toastService.ShowSuccess("Registro Exitoso");
+        }catch(Exception ex)
+        {
+            toastService.ShowError(ex.Message);
+        }
+    }
+
+    private async Task ActualizarPlanDiario(PlanificacionDiariaDTO plan)
+    {
+        try
+        {
+            PlanificacionDiariaDTO planActualizado = await serviceEscalafon.ActualizarPlanDiario(plan);
+            if (planActualizado == null)
+            {
+                toastService.ShowWarning("No se pudo actualizar. Ha ocurrido un error");
+                return;
+            }
+            planNuevoEnServicio = null;
+            await sessionStorage.RemoveItemAsync(SD.SessionEdicionEstado);
+            toastService.ShowSuccess("Cambio Exitoso");
+        }catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
+
+
+    private async Task CancelarNuevoEstado()
+    {
+        planNuevoEnServicio = null;
+
+    }
+
+    private async Task EliminarPlanDiario(PlanificacionDiariaDTO plan)
+    {
+        try
+        {
+            if (plan == null)
+            {
+                return;
+            }
+            bool confirmacion = await js.MsgConfirmacion("Desea eliminar este estado del funcionario");
+            if (!confirmacion) { return;  }
+            bool resultado = await serviceEscalafon.EliminarPlanDiario(plan);
+            if (resultado)
+            {
+                toastService.ShowSuccess("Eliminación del estado de funcionario exitosa");
+            }
+        }
+        catch (Exception ex)
+        {
+            toastService.ShowWarning(ex.Message);
+        }
+    }
+
+    private async Task VerPrefFS()
+    {
+        await VerPrefFuncionarioServicio.InvokeAsync(Servicio);
+    }
+
+    private async Task VisorEstadosEnServicio()
+    {
+        try
+        {
+            VisorHistorialServicio visor = new()
+                {
+                    FechaPlanificacionActual = serviceEscalafon.FechaPlanificacion,
+                    ServicioDTORef = Servicio
+                };
+            await localStorage.SetItemAsync(SD.VisorHistorialServicio, visor);
+
+            await js.WindowPopUp($"/VisorHorariosServicio/{Servicio.Id}",1200);
+
+        }catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
+
+    private async Task HabilitarModalMoverAOtroServicio(PlanificacionDiariaDTO estado)
+    {
+        VisibilidadMoverServicio = true;
+        estadoAMover = estado;
+    }
+
+    private async Task MoverAOtroServicio(ServicioDTO servicioDTO)
+    {
+        try
+        {
+            ServicioDTO servicioAnterior = estadoAMover.Servicio;
+
+            estadoAMover.Servicio = servicioDTO;
+            var mover = await serviceEscalafon.MoverAOtroServicioPlanDiario(estadoAMover,servicioAnterior);
+            if (mover == null)
+                throw new Exception("No se ha podido mover el funcionario al servicio especificado");
+
+            VisibilidadMoverServicio = false;
+            toastService.ShowSuccess("Movido correctamente");
+        }catch (Exception ex)
+        {
+            VisibilidadMoverServicio = false;
+            await js.MsgError(ex.Message);
+        }
+    }
+
+
+
+
+    }

@@ -1,0 +1,81 @@
+﻿<div class="top-row pl-4 navbar navbar-dark">
+    <a class="navbar-brand" href="/Index">Vector 1.0</a>
+    <button class="navbar-toggler" @onclick="ToggleNavMenu">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+</div>
+
+@if (usuario != null)
+{
+    <div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
+        <ul class="nav flex-column">
+            @if (usuario.Rol.RolAsignado == SD.RolesEnum.ADMINISTRADOR.ToString())
+            {
+                <li class="nav-item px-3">
+                    <NavLink class="nav-link" href="Index" Match="NavLinkMatch.All">
+                        <span class="oi oi-home" aria-hidden="true"></span> Inicio
+                    </NavLink>
+                </li>
+                <li class="nav-item px-3">
+                    <NavLink class="nav-link" href="Roles">
+                        <span class="oi oi-plus" aria-hidden="true"></span> Roles
+                    </NavLink>
+                </li>
+                <li class="nav-item px-3">
+                    <NavLink class="nav-link" href="MesasOperativas">
+                        <span class="oi oi-plus" aria-hidden="true"></span> Mesas Operativas
+                    </NavLink>
+                </li>
+                <li class="nav-item px-3">
+                    <NavLink class="nav-link" href="usuarios">
+                        <span class="oi oi-plus" aria-hidden="true"></span> Usuarios
+                    </NavLink>
+                </li>
+                <li class="nav-item px-3">
+                    <NavLink class="nav-link" href="Funcionarios">
+                        <span class="oi oi-plus" aria-hidden="true"></span> Funcionarios
+                    </NavLink>
+                </li>
+            }
+            @if (usuario.Rol.RolAsignado == SD.RolesEnum.SUBJEFE_OPERATIVO.ToString() ||
+             usuario.Rol.RolAsignado == SD.RolesEnum.ADMINISTRADOR.ToString())
+            {
+                <li class="nav-item px-3">
+                    <NavLink class="nav-link" href="ClientesServicios">
+                        <span class="oi oi-plus" aria-hidden="true"></span> Clientes y Servicios
+                    </NavLink>
+                </li>
+            }
+            @if (usuario.Rol.RolAsignado == SD.RolesEnum.SUBJEFE_OPERATIVO.ToString())
+            {
+                <li class="nav-item px-3">
+                    <NavLink class="nav-link" href="Planificacion/Index">
+                        <span class="oi oi-plus" aria-hidden="true"></span> Planificación Escalafón
+                    </NavLink>
+                </li>
+            }
+            @if (usuario.Rol.RolAsignado == SD.RolesEnum.ASISTENTE_OPERATIVO.ToString())
+            {
+                <li class="nav-item px-3">
+                    <NavLink class="nav-link" href="Operativa/Index">
+                        <span class="oi oi-plus" aria-hidden="true"></span> Escalafón
+                    </NavLink>
+                </li>
+            }
+        </ul>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public UsuarioDTO usuario { get; set; }
+
+    private bool collapseNavMenu = true;
+
+    private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+}

@@ -1,0 +1,63 @@
+﻿@page "/GanttAusencias"
+@layout EmptyLayout
+@using Syncfusion.Blazor.Gantt
+@inject ILocalStorageService localStorage
+@inject ServiceEscalafon serviceEscalafon
+@inject NavigationManager nav
+@inject IJSRuntime js
+
+<div class="row justify-content-center">
+    <h5>Visor Ausencias</h5>
+</div>
+<div class="row justify-content-center">
+    <div class="col-3">
+        <select @bind="ComputoNombre" class="custom-select mr-2" id="inputGroupSelect04">
+            @foreach (var computo in SD.FiltroGantt.Keys)
+            {
+                <option value="@computo">@computo</option>
+            }
+        </select>
+    </div>
+    <div class="form-check col-3">
+        <input class="form-check-input ml-1 mb-0" type="checkbox" @bind-value="checkTerminoAusencia" id="flexCheckAusencia">
+        <label class="form-check-label ml-4 mb-0" for="flexCheckAusencia">Próximas culminaciones</label>
+    </div>
+    <div class="col-2">
+        <button class="btn btn-primary btn-lg pt-0 pb-0" @onclick="HacerGrafico">Visualizar</button>
+    </div>
+</div>
+<div id="chart" style="width:98%">
+    @* area de dibujo del timeChart *@
+</div>
+
+@code {
+
+    private string ComputoNombre = "LICENCIA";
+    private bool visibilidadLoading = false;
+    private bool checkTerminoAusencia = false;
+    private DateTime fechaPlanificacion;
+    UsuarioDTO usuarioDTO = null;
+
+    public List<GanttModel> dataAusenciasGantt { get; set; }
+
+    protected async override Task OnInitializedAsync()
+    {
+        usuarioDTO = await localStorage.GetItemAsync<UsuarioDTO>(SD.LocalUsuario);
+
+        if (usuarioDTO == null)
+            nav.NavigateTo("/", true);
+        
+    }
+    private async Task HacerGrafico()
+    {
+        DateTime fechaPlanificacion = await localStorage.GetItemAsync<DateTime>(SD.FechaPlanificacionGantt);
+        visibilidadLoading = true;
+        dataAusenciasGantt = await serviceEscalafon.ObtenerAusenciasGantt(ComputoNombre, checkTerminoAusencia, fechaPlanificacion, usuarioDTO.Token);
+        if (dataAusenciasGantt != null && dataAusenciasGantt.Count > 0)
+        {
+            await js.InvokeVoidAsync("ChartResult.starts", dataAusenciasGantt);
+        }
+        visibilidadLoading = false;
+    }
+
+}

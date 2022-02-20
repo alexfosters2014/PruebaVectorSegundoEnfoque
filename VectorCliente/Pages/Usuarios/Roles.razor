@@ -1,0 +1,146 @@
+﻿@page "/Roles"
+@inject ILocalStorageService localStorage
+@inject NavigationManager nav
+@inject IJSRuntime js
+@inject IServiceRol serviceRol
+
+<h3>Mantenimiento de Roles y Niveles de usuarios</h3>
+@if (todos != null)
+{
+    <section class="container">
+
+        <div class="row">
+            <article class="col-8">
+                <table class="table">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th scope="col">Rol Asignado</th>
+                            <th scope="col">Nivel</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var rol in todos)
+                        {
+                            <tr>
+                                <td>@rol.RolAsignado</td>
+                                <td>@rol.Nivel</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                <div class="d-flex justify-content-center">
+                    <a href="" @onclick="Nuevo" @onclick:preventDefault><IconEdit Icon="add" /></a>
+                </div>
+            </article>
+
+            <article class="col-4">
+                @if (aparecer)
+                {
+                    <h3>Nuevo</h3>
+                    <EditForm Model="rolNuevo" OnValidSubmit="NuevoRol">
+                        <DataAnnotationsValidator />
+                        <div class="form-group">
+                            <label for="tipo">Rol*</label>
+                            @*<select @bind="@rolNuevo.RolAsignado" id="tipo" class="form-control">
+            <option value="none">Ninguno</option>
+            @foreach (var rol in filtroUnico)
+            {
+                <option value="@rol">@rol</option>
+            }
+            </select>*@
+                            <select @bind="@rolNuevo.RolAsignado" id="tipo" class="form-control">
+                                <option value="none">Ninguno</option>
+                                @foreach (var rol in Enum.GetValues(typeof(SD.RolesEnum)))
+                                {
+                                    <option value="@rol">@rol</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="tipo">Nivel*</label>
+                            <input type="range" min="1" max="5" step="1" @bind="@rolNuevo.Nivel"
+                                   @bind:event="oninput" /><span class="contador">@rolNuevo.Nivel</span>
+                         </div>
+                                <div class="divider"></div>
+
+                                <div class="col text-center">
+                                    <button type="submit" class="btn btn-primary">Agregar</button>
+                                    <button type="button" class="btn btn-primary" @onclick="Cancelar">Cancelar</button>
+                                </div>
+                        </EditForm>
+                }
+            </article>
+
+
+        </div>
+    </section>
+
+}
+
+@code {
+    private UsuarioDTO usuarioLogueado;
+    private bool aparecer = false;
+
+    private List<RolDTO> todos;
+    private RolDTO rolNuevo = new RolDTO();
+
+    //private List<string> filtroUnico;
+
+
+    protected async override Task OnInitializedAsync()
+    {
+        await cargaInicial();
+    }
+    private async Task cargaInicial()
+    {
+        try
+        {
+            usuarioLogueado = await localStorage.GetItemAsync<UsuarioDTO>(SD.LocalUsuario);
+            if (usuarioLogueado == null)
+            {
+                nav.NavigateTo("/", true);
+                return;
+            }
+            todos = await serviceRol.ObtenerTodos(usuarioLogueado.Token);
+        }
+        catch (Exception ex)
+        {
+            await js.MsgError(ex.Message);
+        }
+    }
+
+    private void Nuevo()
+    {
+        aparecer = true;
+        rolNuevo = new RolDTO();
+        rolNuevo.RolAsignado = "none";
+        rolNuevo.Nivel = 1;
+        //filtroUnico = todos.Select(w => w.RolAsignado).Distinct().ToList();
+    }
+
+    private async Task NuevoRol()
+    {
+        try
+        {
+            if (rolNuevo.RolAsignado == "none")
+            {
+                await js.MsgAdvertencia("Debe elegir un rol");
+                return;
+            }
+            var resultado = await serviceRol.Agregar(rolNuevo, usuarioLogueado.Token);
+            rolNuevo.Id = resultado.Id;
+            todos.Add(rolNuevo);
+            aparecer = false;
+            StateHasChanged();
+            await js.MsgExitoso("Se ha creado un nuevo nivel de rol");
+        }
+        catch (Exception ex)
+        {
+            await js.MsgError(ex.Message);
+        }
+    }
+    private void Cancelar()
+    {
+        aparecer = false;
+    }
+}

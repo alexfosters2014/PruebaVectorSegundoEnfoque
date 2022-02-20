@@ -1,0 +1,88 @@
+﻿@inject ILocalStorageService localStorage
+@inject ServiceEscalafon serviceEscalafon
+@inject NavigationManager nav
+@inject IJSRuntime js
+@inject HubConnection hubConnection
+@inject IToastService toastService
+
+<ModalFuncionarioOperativoBolsa ObtenerFuncionarioFechaDTO="SeleccionarTipoFuncionarioFecha" Visibilidad="modal" CerrarModal="CerrarModal"/>
+
+<div class="card m-2 p-5 scrolVertical">
+    <h5 class="estiloTituloBolsa">Retenes/Rotativos</h5>
+    @if (bolsaRotativos != null)
+    {
+        @foreach (var estado in bolsaRotativos.Where(w => w.TipoResumido == SD.EstadoRotatividad.RETEN.ToString())
+                                                             .OrderBy(o => o.FuncionarioOperativo.Numero)
+                                                             .ToList())
+        {
+            <EstadoContenedorBolsa PlanDiarioDTO="estado" @key="estado.Id+1234"
+                                    ActualizarPlanDiario = "ActualizarPlanDiario" 
+                                    EliminarPlanDiario = "EliminarPlanDiario"/>
+        }
+    <Divider Altura="25px" />
+
+    <h5 class="estiloTituloBolsa">Puntuales/Rotativos</h5>
+        @foreach (var estado in bolsaRotativos.Where(w => w.TipoResumido == SD.EstadoRotatividad.PUNTUAL.ToString()&&
+                                                                         w.Rotativo == true)
+                                                             .OrderBy(o => o.FuncionarioOperativo.Numero)
+                                                             .ToList())
+        {
+            <EstadoContenedorBolsa PlanDiarioDTO="estado" @key="estado.Id+23456"
+                                    ActualizarPlanDiario = "ActualizarPlanDiario"
+                                    EliminarPlanDiario = "EliminarPlanDiario"/>
+        }
+    }
+    <Divider Altura="15px" />
+    <div class="d-flex justify-content-center">
+        <a href="" @onclick="ModalNuevoEstadoBolsa" @onclick:preventDefault><IconEdit Icon="add" /></a>
+    </div>
+
+</div>
+
+@code {
+    [Parameter]
+    public List<PlanificacionDiariaDTO> bolsaRotativos { get; set; }
+
+    private bool modal = false;
+    private string estadoRotatividad = SD.EstadoRotatividad.FIJO.ToString();
+
+    protected override async Task OnInitializedAsync()
+    {
+    }
+
+    private void ModalNuevoEstadoBolsa()
+    {
+        modal = true;
+    }
+    private void CerrarModal()
+    {
+        modal = false;
+    }
+
+    private async Task SeleccionarTipoFuncionarioFecha(FuncionarioFecha funcionarioFechaDTO)
+    {
+        try
+        {
+            PlanificacionDiariaDTO estaAgregado = await serviceEscalafon.AgregarFuncionarioPlanDiarioBolsa(funcionarioFechaDTO);
+            modal = false;
+            if (estaAgregado == null) throw new Exception("No se pudo agregar el funcionario en la bolsa. Err 125");
+            //await serviceEscalafon.AgregarEstadoBolsaFrontEnd(estaAgregado);
+            //StateHasChanged();
+        }
+        catch(Exception ex)
+        {
+            await js.MsgAdvertencia(ex.Message);
+        }
+    }
+
+    private async Task ActualizarPlanDiario(PlanificacionDiariaDTO estado)
+    {
+        
+    }
+
+    private async Task EliminarPlanDiario(PlanificacionDiariaDTO estado)
+    {
+        
+    }
+
+}

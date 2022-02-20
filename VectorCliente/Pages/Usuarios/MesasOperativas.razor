@@ -1,0 +1,121 @@
+﻿@page "/MesasOperativas"
+@inject ILocalStorageService localStorage
+@inject NavigationManager nav
+@inject IJSRuntime js
+@inject IServiceMesaOperativa serviceMop
+
+<h3>Mantenimiento de Mesas Operativas</h3>
+@if (todos != null)
+{
+    <section class="container">
+
+        <div class="row">
+            <article class="col-8">
+                    <table class="table">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th scope="col">Nombre</th>
+                                <th scope="col">Descripcion</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var mop in todos)
+                            {
+                                <tr>
+                                    <td>@mop.Nombre</td>
+                                    <td>@mop.Descripcion</td>
+                               </tr>
+                            }
+                        </tbody>
+                    </table>
+                <div class="d-flex justify-content-center">
+                    <a href="" @onclick="Nuevo" @onclick:preventDefault><IconEdit Icon="add" /></a>
+                </div>
+            </article>
+
+            <article class="col-4">
+                @if (aparecer)
+                {
+                    <h3>Nuevo</h3>
+                    <EditForm Model="mesaop" OnValidSubmit="NuevaMop">
+                        <DataAnnotationsValidator />
+                        <div class="form-group">
+                            <label for="nombre">Nombre de la mesa operativa*</label>
+                            <InputText @bind-Value="mesaop.Nombre" id="nombre" class="form-control" />
+                            <ValidationMessage For="@( () => mesaop.Nombre)" />
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Descripcion*</label>
+                            <InputText @bind-Value="mesaop.Descripcion" id="email" class="form-control" />
+                            <ValidationMessage For="@( () => mesaop.Descripcion)" />
+                        </div>
+                        <div class="col text-center">
+                            <button type="submit" class="btn btn-primary">Agregar</button>
+                            <button type="button" class="btn btn-primary" @onclick="Cancelar">Cancelar</button>
+                        </div>
+                    </EditForm>
+                }
+            </article>
+
+
+        </div>
+    </section>
+
+}
+
+@code {
+    private UsuarioDTO usuarioLogueado;
+    private bool aparecer = false;
+
+    private List<MesaOperativaDTO> todos;
+    private MesaOperativaDTO mesaop = new MesaOperativaDTO();
+
+    protected async override Task OnInitializedAsync()
+    {
+        await cargaInicial();
+    }
+    private async Task cargaInicial()
+    {
+        try
+        {
+            usuarioLogueado = await localStorage.GetItemAsync<UsuarioDTO>(SD.LocalUsuario);
+            if (usuarioLogueado == null)
+            {
+                nav.NavigateTo("/", true);
+                return;
+            }
+            todos = await serviceMop.ObtenerTodos(usuarioLogueado.Token);
+        }
+        catch (Exception ex)
+        {
+            await js.MsgError(ex.Message);
+        }
+    }
+
+    private void Nuevo()
+    {
+        aparecer = true;
+        mesaop = new MesaOperativaDTO();
+    }
+
+    private async Task NuevaMop()
+    {
+        try
+        {
+            var resultado = await serviceMop.Agregar(mesaop, usuarioLogueado.Token);
+            mesaop.Id = resultado.Id;
+            todos.Add(mesaop);
+            aparecer = false;
+            StateHasChanged();
+            await js.MsgExitoso("Se ha creado una nueva mesa operativa");
+        }
+        catch(Exception ex)
+        {
+            await js.MsgError(ex.Message);
+        }
+    }
+    private void Cancelar()
+    {
+        aparecer = false;
+    }
+}

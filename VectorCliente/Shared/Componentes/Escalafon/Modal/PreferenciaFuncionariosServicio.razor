@@ -1,0 +1,173 @@
+﻿@inject IServicePrefFunServicio servicePrefFunServicio
+@inject ServiceEscalafon serviceEscalafon
+@inject IJSRuntime js
+
+<SfDialog Width="650px" Target="#target" IsModal="true" @bind-Visible="Visibilidad">
+    <DialogTemplates>
+        <Header> @ServicioDTO.NombreDescriptivo </Header>
+        <Content>
+            @if (PrefServicioFuncionarioDTO != null || PrefServicioFuncionarioDTO.Count > 0)
+            {
+                
+                   <table class="table table-striped table-sm tamanioFuenteVisor tamanioMargenPref">
+                        <tr>
+                            <th style="width:1%">Nro.</th>
+                            <th style="width:40%">Funcionario</th>
+                            <th>Observaciones</th>
+                            <th></th>
+                        </tr>
+
+                        @foreach(var preferencia in PrefServicioFuncionarioDTO)
+                      {
+                         <tr>
+                             <td title="Nro. Funcionario Operativo" align="center">@preferencia.Funcionario.Numero</td>
+                             <td title="Nombre Funcionario: @preferencia.Funcionario.ToString()" style="width:12%" align="left">
+                                <ImgRotativo TipoResumido="@preferencia.Funcionario.TipoResumido"/>
+                                @preferencia.Funcionario.NombreCorto()
+                             </td>
+                              <td title="Observaciones"><input @bind="@preferencia.Observaciones" class="form-control colorDark" /></td>
+                               <td style="width:1.5%">
+                                    <a href="" @onclick="() => Eliminar(preferencia.Id)" @onclick:preventDefault>
+                                        <img src="icons/delete.png" class="imgEstado" />
+                                    </a>
+                              </td>
+                         </tr>
+                       }
+                </table>
+               
+                 <button class="btn btn-primary" @onclick="Guardar">Guardar Cambios</button>
+            }
+            else
+            {
+                <h5 style="color:red">Todavia no hay preferencias de funcionarios en este servicio</h5>
+            }
+            <Divider Altura="20px" />
+             <div style="border:1px grey solid;padding:15px">
+                 <p>Busca el funcionario para agregar a la lista</p>
+                              <BusquedaFuncionario Busqueda="" 
+                                                   DevolverFuncionarioDTO="AgregarFuncionarioAPreferencias"
+                                                   FuncionariosDTO="funcionariosDTO" />
+             </div>
+        </Content>
+    </DialogTemplates>
+    <DialogButtons>
+        <DialogButton Content="Cerrar" IsPrimary="true" OnClick="@CerrarModalActual" />
+    </DialogButtons>
+    @*<DialogEvents OnOpen="@DialogOpen" Closed="@DialogClose" OnOverlayModalClick="@OverlayClick"></DialogEvents>*@
+    <DialogAnimationSettings Effect="@DialogEffect.Fade"></DialogAnimationSettings>
+</SfDialog>
+<style>
+    #target {
+        max-height: 800px;
+        height: 100%;
+    }
+</style>
+
+
+@code {
+    [Parameter]
+    public bool Visibilidad { get; set; }
+
+    [Parameter]
+    public EventCallback CerrarModal { get; set; }
+
+    [Parameter]
+    public List<PreferenciaFuncionarioServicioDTO> PrefServicioFuncionarioDTO { get; set; }
+
+    [Parameter]
+    public ServicioDTO ServicioDTO { get; set; }
+
+
+
+    private string busqueda = "";
+    private List<FuncionarioDTO> funcionariosDTO = new();
+
+
+    private async Task CerrarModalActual()
+    {
+        await CerrarModal.InvokeAsync();
+    }
+
+    private async Task AgregarFuncionarioAPreferencias(FuncionarioDTO funcionarioDTO)
+    {
+        try
+        {
+            PreferenciaFuncionarioServicioDTO nuevaPref = new()
+                {
+                    Funcionario = funcionarioDTO,
+                    Servicio = ServicioDTO,
+                    Observaciones = ""
+                };
+
+            int duplicado = PrefServicioFuncionarioDTO.Count(c => c.Funcionario.Id == funcionarioDTO.Id);
+            if (duplicado > 0)
+            {
+                await js.MsgAdvertencia("El funcionario seleccionado ya se encuentra en el listado");
+                return;
+            }
+
+            PreferenciaFuncionarioServicioDTO agregado = await servicePrefFunServicio.Agregar(nuevaPref, serviceEscalafon.UsuarioDTO.Token);
+
+            if (agregado != null)
+            {
+                PrefServicioFuncionarioDTO.Add(agregado);
+                busqueda = "";
+                funcionariosDTO = new();
+            }
+            else
+            {
+                await js.MsgError("No se pudo agregar");
+            }
+        }
+        catch (Exception ex)
+        {
+             await js.MsgError(ex.Message);
+        }
+    }
+
+    private async Task Guardar()
+    {
+        try
+        {
+            bool guardado = await servicePrefFunServicio.GuardarCambios(PrefServicioFuncionarioDTO, serviceEscalafon.UsuarioDTO.Token);
+
+            if (guardado)
+            {
+                 await js.MsgExitoso("Cambios Guardados");
+            }
+            else
+            {
+                 await js.MsgError("No se pudo guardar los cambios");
+            }
+        }
+        catch (Exception ex)
+        {
+             await js.MsgError(ex.Message);
+        }
+    }
+
+
+    private async Task Eliminar(int idPref)
+    {
+        try
+        {
+            bool eliminado = await servicePrefFunServicio.Eliminar(idPref, serviceEscalafon.UsuarioDTO.Token);
+
+            if (eliminado)
+            {
+                PrefServicioFuncionarioDTO.RemoveAll(r => r.Id == idPref);
+            }
+        else
+        {
+               await js.MsgError("No se pudo eliminar");
+        }
+         }
+        catch (Exception ex)
+        {
+             await js.MsgError(ex.Message);
+        }
+    }
+
+
+
+}

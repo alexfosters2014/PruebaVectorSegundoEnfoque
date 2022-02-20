@@ -1,0 +1,73 @@
+﻿@inject ServiceEscalafon serviceEscalafon
+
+<SfDialog Width="500px" Target="#target" IsModal="true" @bind-Visible="Visibilidad">
+    <DialogTemplates>
+        <Header> Tipo </Header>
+        <Content>
+            <div style="padding:15px;border-radius:15px;border:1px solid orange;">
+                <table class="table table-borderless">
+                    <tr>
+                        <td><img src="/iconosPuesto/civil.png" class="imgTablePresentacion" /></td>
+                        <td>CIVIL</td>
+                        <td><button @onclick="@(() => SeleccionarTipo.InvokeAsync("CIVIL"))" class="btn btn-outline-secondary">Seleccionar</button></td>
+                    </tr>
+                    <tr>
+                        <td><img src="/iconosPuesto/civil-traje.png" class="imgTablePresentacion" /></td>
+                        <td>CIVIL CON TRAJE</td>
+                        <td><button @onclick="@(() => SeleccionarTipo.InvokeAsync("CIVIL C/TRAJE"))" lass="btn btn-outline-secondary">Seleccionar</button></td>
+                    </tr>
+                    <tr>
+                        <td><img src="/iconosPuesto/civil-armado.png" class="imgTablePresentacion" /></td>
+                        <td>CIVIL ARMADO</td>
+                        <td><button @onclick="@(() => SeleccionarTipo.InvokeAsync("CIVIL ARMADO"))" class="btn btn-outline-secondary">Seleccionar</button></td>
+                    </tr>
+                    <tr>
+                        <td><img src="/iconosPuesto/civil-traje-armado.png" class="imgTablePresentacion" /></td>
+                        <td>CIVIL ARMADO CON TRAJE</td>
+                        <td><button @onclick="@(() => SeleccionarTipo.InvokeAsync("CIVIL ARMADO C/TRAJE"))" class="btn btn-outline-secondary">Seleccionar</button></td>
+                    </tr>
+                    <tr>
+                        <td><img src="/iconosPuesto/militar-sinArma.png" class="imgTablePresentacion" /></td>
+                        <td>MILITAR</td>
+                        <td><button @onclick="@(() => SeleccionarTipo.InvokeAsync("MILITAR NO ARMADO"))" class="btn btn-outline-secondary">Seleccionar</button></td>
+                    </tr>
+                    <tr>
+                        <td><img src="/iconosPuesto/militar-armado.png" class="imgTablePresentacion" /></td>
+                        <td>MILITAR ARMADO</td>
+                        <td><button @onclick="@(() => SeleccionarTipo.InvokeAsync("MILITAR ARMADO"))" class="btn btn-outline-secondary">Seleccionar</button></td>
+                    </tr>
+                </table>
+            </div>
+        </Content>
+    </DialogTemplates>
+    <DialogButtons>
+        <DialogButton Content="Cerrar" IsPrimary="true" OnClick="@CerrarModalComponent" />
+    </DialogButtons>
+    @*<DialogEvents OnOpen="@DialogOpen" Closed="@DialogClose" OnOverlayModalClick="@OverlayClick"></DialogEvents>*@
+    <DialogAnimationSettings Effect="@DialogEffect.Fade"></DialogAnimationSettings>
+</SfDialog>   
+
+<style>
+    #target {
+        max-height: 800px;
+        height: 100%;
+    }
+</style>
+
+@code {
+    [Parameter]
+    public EventCallback<string> SeleccionarTipo { get; set; }
+
+    [Parameter]
+    public bool Visibilidad { get; set; }
+
+    [Parameter]
+    public EventCallback CerrarModal { get; set; }
+
+
+
+    private void CerrarModalComponent()
+    {
+        CerrarModal.InvokeAsync();
+    }
+}

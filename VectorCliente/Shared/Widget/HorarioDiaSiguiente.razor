@@ -1,0 +1,14 @@
+﻿@inject ServiceEscalafon serviceEscalafon
+
+ @if (Horario != null)
+{
+    <img src="iconosPuesto/iconEstados/@IndicadorJornadaDiaSiguiente()" class="imgEstadoIndicadorFechasiguiente" />
+}
+
+@code {
+    [Parameter]
+    public DateTime? Horario { get; set; }
+
+    private string IndicadorJornadaDiaSiguiente() => Horario.Value.Date > serviceEscalafon.FechaPlanificacion.Date ? "siguienteDia.png" : "vacio.png";
+
+}

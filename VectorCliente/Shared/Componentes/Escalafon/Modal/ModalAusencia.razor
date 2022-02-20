@@ -1,0 +1,69 @@
+﻿@inject ServiceEscalafon serviceEscalafon
+@inject IJSRuntime js
+@inject IToastService toastService
+
+<SfDialog Width="650px" Target="#target" IsModal="true" @bind-Visible="Visibilidad">
+    <DialogTemplates>
+        <Header> Nueva ausencia </Header>
+        <Content>
+            <hr />
+            <div class="form-group">
+                <label>Fecha de inicio</label>
+                <input type="date" @bind="Finicio" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label>Fecha de finalización</label>
+                <input type="date" @bind="Ffin" class="form-control" />
+            </div>
+
+            <button class="btn btn-primary form-control" @onclick="AgregarFechas">Aceptar</button>
+            <hr />
+        </Content>
+    </DialogTemplates>
+       @*<DialogEvents OnOpen="@DialogOpen" Closed="@DialogClose" OnOverlayModalClick="@OverlayClick"></DialogEvents>*@
+    <DialogAnimationSettings Effect="@DialogEffect.Fade"></DialogAnimationSettings>
+</SfDialog>
+<style>
+    #target {
+        max-height: 800px;
+        height: 100%;
+    }
+</style>
+@code {
+    [Parameter]
+    public bool Visibilidad { get; set; }
+
+    [Parameter]
+    public EventCallback<AusenciaDTO> AsignarFechasAusencia { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> CerrarModal { get; set; }
+
+    private DateTime Finicio = DateTime.Today.Date;
+    private DateTime Ffin = DateTime.Today.Date;
+
+    protected async override Task OnInitializedAsync()
+    {
+        Finicio = serviceEscalafon.FechaPlanificacion;
+        Ffin = serviceEscalafon.FechaPlanificacion;
+    }
+
+    private async Task AgregarFechas()
+    {
+        if (Finicio > Ffin )
+        {
+            toastService.ShowWarning("La fecha de inicio no puede ser menor que la fecha de finalización", "Advertencia");
+            return;
+        }
+        AusenciaDTO aux = new ()
+        {
+            Desde = Finicio,
+            Hasta = Ffin
+        };
+
+        await AsignarFechasAusencia.InvokeAsync(aux);
+    }
+    
+
+}
+

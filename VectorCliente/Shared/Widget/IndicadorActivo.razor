@@ -1,0 +1,16 @@
+﻿
+@if (Activo)
+{
+
+    <img src="/icons/true.png" alt="image" class="imgTable" />
+}
+else
+{
+    <img src="/icons/false.png" alt="image" class="imgTable" />
+}
+
+
+@code {
+    [Parameter]
+    public bool Activo { get; set; }
+}
