@@ -790,3 +790,5 @@ C:\Users\Alex\Source\Repos\alexfosters2014\PruebaVectorSegundoEnfoque\VectorClie
 C:\Users\Alex\Source\Repos\alexfosters2014\PruebaVectorSegundoEnfoque\VectorCliente\obj\Debug\net5.0\VectorCliente.dll
 C:\Users\Alex\Source\Repos\alexfosters2014\PruebaVectorSegundoEnfoque\VectorCliente\obj\Debug\net5.0\ref\VectorCliente.dll
 C:\Users\Alex\Source\Repos\alexfosters2014\PruebaVectorSegundoEnfoque\VectorCliente\obj\Debug\net5.0\VectorCliente.pdb
+C:\Users\Alex\Source\Repos\alexfosters2014\PruebaVectorSegundoEnfoque\VectorCliente\obj\Debug\net5.0\RazorDeclaration\Pages\Planificacion\EscalafonPlanificacion.razor.g.cs
+C:\Users\Alex\Source\Repos\alexfosters2014\PruebaVectorSegundoEnfoque\VectorCliente\obj\Debug\net5.0\Razor\Pages\Planificacion\EscalafonPlanificacion.razor.g.cs

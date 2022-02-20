@@ -29,6 +29,7 @@ namespace VectorCliente.Services
         public List<EscalafonServiciosData> EscalafonServicioData { get; set; } //Para estados fijos
         public List<EscalafonServiciosData> EscalafonServiciosFiltro { get; set; }
         public List<PlanificacionDiariaDTO> BolsaEstados { get; set; } //Para estados rotatorios
+        public List<PlanificacionDiariaDTO> EscalafonFiltrado { get; set; }
         public Dictionary<string,int> FuncionariosSE { get; set; }
         #endregion
         public GanttModel GantModelFiltro { get; set; }
@@ -48,13 +49,15 @@ namespace VectorCliente.Services
             };
         }
 
+
         public async Task CrearNuevo(GeneralTransport modelo)
         {
             try {
                 EscalafonModel = await serviceDataEscalafon.CrearNuevo(modelo, UsuarioDTO.Token);
-                EscalafonModel.ServiciosDTO = EscalafonModel.ServiciosDTO.OrderByDescending(o => o.Id).ToList();
-                await ActualizarEstructuraDeServicios();
-                await FiltrarEscalafon();
+                //EscalafonModel.ServiciosDTO = EscalafonModel.ServiciosDTO.OrderByDescending(o => o.Id).ToList();
+                //await ActualizarEstructuraDeServicios();
+                //await FiltrarEscalafon();
+                await ReestructuraEscalafonFiltrado();
                 await CargarBolsa();
                 await hubConnection.StartAsync();
             } catch (Exception ex)
@@ -94,10 +97,11 @@ namespace VectorCliente.Services
             try
             {
                 EscalafonModel = await serviceDataEscalafon.AbrirPlanificacion(modelo, UsuarioDTO.Token);
-                EscalafonModel.ServiciosDTO = EscalafonModel.ServiciosDTO.OrderByDescending(o => o.Id).ToList();
-                await ActualizarEstructuraDeServicios();
+                //EscalafonModel.ServiciosDTO = EscalafonModel.ServiciosDTO.OrderByDescending(o => o.Id).ToList();
+                //await ActualizarEstructuraDeServicios();
                 filtroEscalafon.FiltroIdCliente = EscalafonModel.ServiciosDTO[0].Cliente.Id;
-                await FiltrarEscalafon();
+                await ReestructuraEscalafonFiltrado();
+               // await FiltrarEscalafon();
                 await CargarBolsa();
 
                 await hubConnection.StartAsync();
@@ -112,9 +116,11 @@ namespace VectorCliente.Services
             try
             {
                 EscalafonModel = await serviceDataEscalafon.CopiaEscalafon(modelo, UsuarioDTO.Token);
-                EscalafonModel.ServiciosDTO = EscalafonModel.ServiciosDTO.OrderByDescending(o => o.Id).ToList();
-                await ActualizarEstructuraDeServicios();
-                await FiltrarEscalafon();
+                //EscalafonModel.ServiciosDTO = EscalafonModel.ServiciosDTO.OrderByDescending(o => o.Id).ToList();
+                //await ActualizarEstructuraDeServicios();
+                //await FiltrarEscalafon();
+                filtroEscalafon.FiltroIdCliente = EscalafonModel.ServiciosDTO[0].Cliente.Id;
+                await ReestructuraEscalafonFiltrado();
                 await CargarBolsa();
                 await CargarFuncionariosSE();
 
@@ -126,6 +132,36 @@ namespace VectorCliente.Services
             }
         }
 
+        public async Task ReestructuraEscalafonFiltrado()
+        {
+            EscalafonFiltrado = null;
+
+            if (filtroEscalafon.FiltroIdCliente > 0)
+            {
+                EscalafonFiltrado = EscalafonModel.planesDiarios.Where(w => w.Servicio.Cliente.Id == filtroEscalafon.FiltroIdCliente)
+                    .OrderBy(o => o.Servicio.Id)
+                                                 .ThenBy(t => t.Turno)
+                                                 .ThenBy(t => t.Orden)
+                                                                .ToList();
+
+            }
+            else if (!string.IsNullOrEmpty(filtroEscalafon.FiltroNombreServicio))
+            {
+                EscalafonFiltrado = EscalafonModel.planesDiarios.Where(w => w.Servicio.NombreDescriptivo.ToUpper().Contains(filtroEscalafon.FiltroNombreServicio.ToUpper()))
+                    .OrderBy(o => o.Servicio.Id)
+                                                 .ThenBy(t => t.Turno)
+                                                 .ThenBy(t => t.Orden)
+                    .ToList();
+
+            }
+            else
+            {
+                EscalafonFiltrado = EscalafonModel.planesDiarios.OrderBy(o => o.Servicio.Id)
+                                                 .ThenBy(t => t.Turno)
+                                                 .ThenBy(t => t.Orden).ToList();
+            }
+            int i = 0;
+        }
         public async Task ActualizarEstructuraDeServicios()
         {
             EscalafonServicioData = new();

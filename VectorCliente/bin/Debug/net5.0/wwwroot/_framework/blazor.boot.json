@@ -226,7 +226,7 @@
       "System.Private.CoreLib.dll": "sha256-7n\/jioZu+\/2tD7v1RgjTTrBrviX+kVwPFGJ\/JBsHQGA=",
       "Comun.dll": "sha256-w0XnVzW8US1Cm2nL9c\/EwPP8+6YUQx6RklqN1aJvSEw=",
       "Modelo.dll": "sha256-vo9GRgJ0Y3qtG6Bi31NDS5Cb2BbHbBCrJ6LXjwUtfIM=",
-      "VectorCliente.dll": "sha256-sJ3ewXhCnJ84x3+YMygGkae9+Vq7Aezjf7z5aLbixzo="
+      "VectorCliente.dll": "sha256-w5nWSilWuNaHdUyPvLxeXutElReslmOFjX54zdICmxg="
     },
     "extensions": null,
     "lazyAssembly": null,
@@ -234,7 +234,7 @@
     "pdb": {
       "Comun.pdb": "sha256-MEpagLP3rIHxXApWPzq\/WlL70pvVr9BcYQn6oohYyJ8=",
       "Modelo.pdb": "sha256-e03zxov5x\/fXjFuGVLOsnUlKd6FhAPmDG2un961Yqfc=",
-      "VectorCliente.pdb": "sha256-Cue8ODqHBNEp5Il7cWzbSgNh02VMN8yZFPUD8ptYH2w="
+      "VectorCliente.pdb": "sha256-nyOXdnyo9qcYdRO+vWwFuoKdx+NBiak3AB5WUvLTuZQ="
     },
     "runtime": {
       "dotnet.timezones.blat": "sha256-Uv0JiOiPEvlGxygIhcdY8XYm\/Nt+zgVckKrqB2uih0w=",

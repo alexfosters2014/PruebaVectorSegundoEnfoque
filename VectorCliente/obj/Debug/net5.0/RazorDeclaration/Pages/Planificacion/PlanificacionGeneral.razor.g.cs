@@ -243,7 +243,7 @@ using Syncfusion.Blazor.Navigations;
 #line default
 #line hidden
 #nullable disable
-    [Microsoft.AspNetCore.Components.RouteAttribute("/Planificacion/Escalafon")]
+    [Microsoft.AspNetCore.Components.RouteAttribute("/Planificacion/EscalafonViejo")]
     public partial class PlanificacionGeneral : Microsoft.AspNetCore.Components.ComponentBase
     {
         #pragma warning disable 1998
